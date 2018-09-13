@@ -34,17 +34,17 @@ namespace TodoApi.Controllers
         }
         
         [HttpGet]
-        public ActionResult<List<TodoList>> GetAll()
+        public async Task<ActionResult<List<TodoList>>> GetAllAsync()
         {
-            return _context.TodoLists.Include(s => s.Items).ToList();
+            return await _context.TodoLists.Include(s => s.Items).ToListAsync();
         }
 
         [HttpGet("{id}", Name = "GetList")]
-        public ActionResult<TodoList> GetById(long id)
+        public async Task<ActionResult<TodoList>> GetByIdAsync(long id)
         {
-            var list = _context.TodoLists
+            var list = await _context.TodoLists
                 .Include(s => s.Items)
-                .FirstOrDefault(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             if (list == null)
             {
@@ -57,17 +57,17 @@ namespace TodoApi.Controllers
         [HttpPost]
         [ProducesResponseType(201)]     // Created
         [ProducesResponseType(400)]     // BadRequest
-        public IActionResult Create([FromBody] TodoList list)
+        public async Task<IActionResult> CreateAsync([FromBody] TodoList list)
         {
-            _context.TodoLists.Add(list);
-            _context.SaveChanges();
+            await _context.TodoLists.AddAsync(list);
+            await _context.SaveChangesAsync();
             return CreatedAtRoute("GetList", new { id = list.Id }, list);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(long id, [FromBody] TodoList list)
+        public async Task<IActionResult> UpdateAsync(long id, [FromBody] TodoList list)
         {
-            var current = _context.TodoLists.Find(id);
+            var current = await _context.TodoLists.FindAsync(id);
             if (current == null)
             {
                 return NotFound();
@@ -82,14 +82,14 @@ namespace TodoApi.Controllers
             current.Name = list.Name;
             current.Items.AddRange(list.Items);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(long id)
+        public async Task<IActionResult> DeleteAsync(long id)
         {
-            var list = _context.TodoLists.Find(id);
+            var list = await _context.TodoLists.FindAsync(id);
             if (list == null)
             {
                 return NotFound();
@@ -97,7 +97,7 @@ namespace TodoApi.Controllers
             else
             {
                 _context.TodoLists.Remove(list);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return NoContent();
             }
         }
