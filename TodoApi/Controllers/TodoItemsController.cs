@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -40,8 +41,8 @@ namespace TodoApi.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(201)]     // Created
-        [ProducesResponseType(400)]     // BadRequest
+        [ProducesResponseType(typeof(TodoListItem), (int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateAsync([FromBody] TodoListItem item)
         {
             var list = await _context.TodoLists.FindAsync(item.TodoListId);
@@ -58,6 +59,8 @@ namespace TodoApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(TodoListItem), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateAsync(long id, [FromBody] TodoListItem item)
         {
             var current = await _context.TodoItems.FindAsync(id);
@@ -70,7 +73,7 @@ namespace TodoApi.Controllers
             current.IsComplete = item.IsComplete;
 
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok(current);
         }
 
         [HttpDelete("{id}")]
