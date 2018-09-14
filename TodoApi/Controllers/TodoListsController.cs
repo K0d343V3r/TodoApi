@@ -35,13 +35,13 @@ namespace TodoApi.Controllers
         }
         
         [HttpGet]
-        public async Task<ActionResult<List<TodoList>>> GetAllAsync()
+        public async Task<ActionResult<List<TodoList>>> GetAllListsAsync()
         {
             return await _context.TodoLists.Include(s => s.Items).ToListAsync();
         }
 
         [HttpGet("{id}", Name = "GetList")]
-        public async Task<ActionResult<TodoList>> GetByIdAsync(long id)
+        public async Task<ActionResult<TodoList>> GetListAsync(long id)
         {
             var list = await _context.TodoLists
                 .Include(s => s.Items)
@@ -58,7 +58,7 @@ namespace TodoApi.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(TodoList), (int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> CreateAsync([FromBody] TodoList list)
+        public async Task<IActionResult> CreateListAsync([FromBody] TodoList list)
         {
             await _context.TodoLists.AddAsync(list);
             await _context.SaveChangesAsync();
@@ -68,7 +68,7 @@ namespace TodoApi.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(TodoList), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> UpdateAsync(long id, [FromBody] TodoList list)
+        public async Task<IActionResult> UpdateListAsync(long id, [FromBody] TodoList list)
         {
             var current = await _context.TodoLists.FindAsync(id);
             if (current == null)
@@ -90,7 +90,7 @@ namespace TodoApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAsync(long id)
+        public async Task<IActionResult> DeleteListAsync(long id)
         {
             var list = await _context.TodoLists.FindAsync(id);
             if (list == null)
@@ -103,6 +103,28 @@ namespace TodoApi.Controllers
                 await _context.SaveChangesAsync();
                 return NoContent();
             }
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteListsAsync([FromQuery(Name ="id")] List<long> ids)
+        {
+            var lists = new List<TodoList>();
+            foreach (var id in ids)
+            {
+                var list = await _context.TodoLists.FindAsync(id);
+                if (list == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    lists.Add(list);
+                }
+            }
+
+            _context.TodoLists.RemoveRange(lists);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }
