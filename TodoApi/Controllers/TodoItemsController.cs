@@ -69,8 +69,8 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            current.Name = item.Name;
-            current.IsComplete = item.IsComplete;
+            current.Task = item.Task;
+            current.Done = item.Done;
 
             await _context.SaveChangesAsync();
             return Ok(current);
