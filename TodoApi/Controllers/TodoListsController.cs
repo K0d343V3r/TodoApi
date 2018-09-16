@@ -46,7 +46,6 @@ namespace TodoApi.Controllers
             var list = await _context.TodoLists
                 .Include(s => s.Items)
                 .FirstOrDefaultAsync(m => m.Id == id);
-
             if (list == null)
             {
                 return NotFound();
@@ -70,21 +69,18 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateListAsync(long id, [FromBody] TodoList list)
         {
-            var current = await _context.TodoLists.FindAsync(id);
+            var current = await _context.TodoLists
+                .Include(s => s.Items)
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (current == null)
             {
                 return NotFound();
             }
 
-            var items = _context.TodoItems.Where(i => i.TodoListId == current.Id);
-            foreach(var item in items)
-            {
-                current.Items.Remove(item);
-            }
+            // update list entity
+            current.UpdateFrom(list);
 
-            current.Name = list.Name;
-            current.Items.AddRange(list.Items);
-
+            _context.Update(current);
             await _context.SaveChangesAsync();
             return Ok(current);
         }
