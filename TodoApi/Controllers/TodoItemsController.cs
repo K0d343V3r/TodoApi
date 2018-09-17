@@ -69,9 +69,10 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            current.Task = item.Task;
-            current.Done = item.Done;
+            // update item entity
+            current.UpdateFrom(item);
 
+            _context.Update(current);
             await _context.SaveChangesAsync();
             return Ok(current);
         }
