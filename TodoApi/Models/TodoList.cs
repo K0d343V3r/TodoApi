@@ -9,7 +9,7 @@ namespace TodoApi.Models
     {
         public long Id { get; set; }
         public string Name { get; set; }
-
+        public int Position { get; set; }
         public List<TodoListItem> Items { get; set; }
 
         public TodoList()
@@ -22,6 +22,7 @@ namespace TodoApi.Models
             // update properties
             Id = list.Id;
             Name = list.Name;
+            Position = list.Position;
 
             // remove obsolete child items
             List<TodoListItem> items = new List<TodoListItem>(Items);
@@ -34,16 +35,18 @@ namespace TodoApi.Models
             }
 
             // update existing or add new child items
-            foreach (var item in list.Items)
+            for (int i = 0; i < list.Items.Count; i++)
             {
-                var current = item.Id == 0 ? null : Items.FirstOrDefault(i => i.Id == item.Id);
+                // ignore passed-in position, sort according to list position
+                list.Items[i].Position = i;
+                var current = list.Items[i].Id == 0 ? null : Items.FirstOrDefault(t => t.Id == list.Items[i].Id);
                 if (current == null)
                 {
-                    Items.Add(item);
+                    Items.Add(list.Items[i]);
                 }
                 else
                 {
-                    current.UpdateFrom(item);
+                    current.UpdateFrom(list.Items[i]);
                 }
             }
         }

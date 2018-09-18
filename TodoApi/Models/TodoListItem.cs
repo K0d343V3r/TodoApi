@@ -7,7 +7,7 @@ namespace TodoApi.Models
         public long Id { get; set; }
         public string Task { get; set; }
         public bool Done { get; set; }
-
+        public int Position { get; set; }
         public long TodoListId { get; set; }
 
         public void UpdateFrom(TodoListItem item)
@@ -15,6 +15,7 @@ namespace TodoApi.Models
             Id = item.Id;
             Task = item.Task;
             Done = item.Done;
+            Position = item.Position;
             TodoListId = item.TodoListId;
         }
     }
