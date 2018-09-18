@@ -22,17 +22,17 @@ namespace TodoApi.Controllers
         {
             _context = context;
 
-            if (_context.TodoLists.Count() == 0)
-            {
-                var todoList = new TodoList
-                {
-                    Name = "List 1"
-                };
-                todoList.Items.Add(new TodoListItem() { Task = "Item 1", Position = 0 });
-                todoList.Items.Add(new TodoListItem() { Task = "Item 2", Position = 1 });
-                _context.TodoLists.Add(todoList);
-                _context.SaveChanges();
-            }
+            //if (_context.TodoLists.Count() == 0)
+            //{
+            //    var todoList = new TodoList
+            //    {
+            //        Name = "List 1"
+            //    };
+            //    todoList.Items.Add(new TodoListItem() { Task = "Item 1", Position = 0 });
+            //    todoList.Items.Add(new TodoListItem() { Task = "Item 2", Position = 1 });
+            //    _context.TodoLists.Add(todoList);
+            //    _context.SaveChanges();
+            //}
         }
         
         [HttpGet]
