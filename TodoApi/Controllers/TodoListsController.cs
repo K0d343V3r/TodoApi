@@ -72,33 +72,20 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateListAsync([FromBody] TodoList list)
         {
-            List<TodoList> lists = await _context.TodoLists.ToListAsync();
-            if (list.Position > lists.Count)
+            // use list position for child items
+            for (int i = 0; i < list.Items.Count; i++)
             {
-                return BadRequest();
+                list.Items[i].Position = i;
             }
-            else
-            {
-                AdjustPositions(lists, list.Position);
-                await _context.TodoLists.AddAsync(list);
 
-                await _context.SaveChangesAsync();
-                return CreatedAtRoute("GetList", new { id = list.Id }, list);
-            }
-        }
+            // adjust list positions based on newly inserted list
+            var lists = await _context.TodoLists.OrderBy(t => t.Position).ToListAsync<ISortable>();
+            EntityHelper.AdjustPositions(lists, list);
 
-        private void AdjustPositions(IList<TodoList> lists, int position)
-        {
-            if (position < lists.Count)
-            {
-                foreach (var list in lists)
-                {
-                    if (list.Position >= position)
-                    {
-                        list.Position = list.Position + 1;
-                    }
-                }
-            }
+            await _context.TodoLists.AddAsync(list);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtRoute("GetList", new { id = list.Id }, list);
         }
 
         [HttpPut("{id}")]
@@ -106,48 +93,27 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateListAsync(long id, [FromBody] TodoList list)
         {
-            List<TodoList> lists = await _context.TodoLists.ToListAsync();
-            if (list.Position > lists.Count)
+            var current = await FetchTodoListAsync(id);
+            if (current == null)
             {
-                return BadRequest();
+                return NotFound();
             }
-            else
+
+            // use list position for child items
+            for (int i = 0; i < list.Items.Count; i++)
             {
-                var current = await FetchTodoListAsync(id);
-                if (current == null)
-                {
-                    return NotFound();
-                }
-
-                // update list entity
-                AdjustPositions(lists, list.Position);
-                current.UpdateFrom(list);
-
-                _context.Update(current);
-                await _context.SaveChangesAsync();
-                return Ok(current);
+                list.Items[i].Position = i;
             }
+
+            // adjust list positions based on newly updated list
+            var lists = await _context.TodoLists.OrderBy(t => t.Position).ToListAsync<ISortable>();
+            EntityHelper.AdjustPositions(lists, list);
+            EntityHelper.UpdateFrom(current, list);
+
+            _context.Update(current);
+            await _context.SaveChangesAsync();
+            return Ok(current);
         }
-
-        //[HttpPatch("{id}")]
-        //[ProducesResponseType(typeof(TodoList), (int)HttpStatusCode.OK)]
-        //[ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        //public async Task<IActionResult> PatchListAsync(long id, [FromBody] JsonPatchDocument<TodoList> patch)
-        //{
-        //    var current = await _context.TodoLists
-        //        .Include(s => s.Items)
-        //        .FirstOrDefaultAsync(m => m.Id == id);
-        //    if (current == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    patch.ApplyTo(current);
-
-        //    _context.Update(current);
-        //    await _context.SaveChangesAsync();
-        //    return Ok(current);
-        //}
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteListAsync(long id)

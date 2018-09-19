@@ -44,33 +44,16 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateItemAsync([FromBody] TodoListItem item)
         {
-            List<TodoListItem> items = await _context.TodoItems.ToListAsync();
-            if (item.Position > items.Count)
-            {
-                return BadRequest();
-            }
-            else
-            {
-                AdjustPositions(items, item.Position);
-                await _context.TodoItems.AddAsync(item);
+            var items = await _context.TodoItems
+                .Where(t => t.TodoListId == item.TodoListId)
+                .OrderBy(t => t.Id)
+                .ToListAsync<ISortable>();
 
-                await _context.SaveChangesAsync();
-                return CreatedAtRoute("GetItem", new { id = item.Id }, item);
-            }
-        }
+            EntityHelper.AdjustPositions(items, item);
+            await _context.TodoItems.AddAsync(item);
 
-        private void AdjustPositions(List<TodoListItem> items, int position)
-        {
-            if (position < items.Count)
-            {
-                foreach (var item in items)
-                {
-                    if (item.Position >= position)
-                    {
-                        item.Position = item.Position + 1;
-                    }
-                }
-            }
+            await _context.SaveChangesAsync();
+            return CreatedAtRoute("GetItem", new { id = item.Id }, item);
         }
 
         [HttpPut("{id}")]
@@ -78,27 +61,20 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateItemAsync(long id, [FromBody] TodoListItem item)
         {
-            List<TodoListItem> items = await _context.TodoItems.ToListAsync();
-            if (item.Position > items.Count)
+            var current = await _context.TodoItems.FindAsync(id);
+            if (current == null)
             {
-                return BadRequest();
+                return NotFound();
             }
-            else
-            {
-                var current = await _context.TodoItems.FindAsync(id);
-                if (current == null)
-                {
-                    return NotFound();
-                }
 
-                // update item entity
-                AdjustPositions(items, item.Position);
-                current.UpdateFrom(item);
+            // update list item entity
+            var items = await _context.TodoItems.OrderBy(t => t.Position).ToListAsync<ISortable>();
+            EntityHelper.AdjustPositions(items, item);
+            EntityHelper.UpdateFrom(current, item);
 
-                _context.Update(current);
-                await _context.SaveChangesAsync();
-                return Ok(current);
-            }
+            _context.Update(current);
+            await _context.SaveChangesAsync();
+            return Ok(current);
         }
 
         [HttpDelete("{id}")]
