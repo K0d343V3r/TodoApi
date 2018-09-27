@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+    <DockerTargetOS>Windows</DockerTargetOS>
+    <UserSecretsId>8e88c71a-5fd0-400e-9a88-f09ddcc595be</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.0.1916590" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
     <PackageReference Include="NSwag.AspNetCore" Version="11.19.1" />
   </ItemGroup>
