@@ -68,7 +68,11 @@ namespace TodoApi.Controllers
             }
 
             // update list item entity
-            var items = await _context.TodoItems.OrderBy(t => t.Position).ToListAsync<ISortable>();
+            var items = await _context.TodoItems
+                .Where(t => t.TodoListId == item.TodoListId)
+                .OrderBy(t => t.Id)
+                .ToListAsync<ISortable>();
+
             EntityHelper.AdjustPositions(items, item);
             EntityHelper.UpdateFrom(current, item);
 
