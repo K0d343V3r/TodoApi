@@ -7,6 +7,14 @@ namespace TodoApi.Models
 {
     public static class EntityHelper
     {
+        public static List<TodoListInfo> ToListInfos(IList<TodoList> lists)
+        {
+            return lists.Select(list => new TodoListInfo() {
+                Id = list.Id,
+                Name = list.Name
+            }).ToList();
+        }
+
         public static void AdjustPositions(IList<ISortable> items, ISortable item)
         {
             if (items.Count == 0)

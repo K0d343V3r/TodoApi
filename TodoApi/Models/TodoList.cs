@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 
 namespace TodoApi.Models
 {
-    public class TodoList : ISortable
+    public class TodoList : TodoListInfo, ISortable
     {
-        public long Id { get; set; }
-        public string Name { get; set; }
         public int Position { get; set; }
         public List<TodoListItem> Items { get; set; }
 
