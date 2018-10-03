@@ -67,16 +67,19 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            // update list item entity
-            var items = await _context.TodoItems
-                .Where(t => t.TodoListId == item.TodoListId)
-                .OrderBy(t => t.Id)
-                .ToListAsync<ISortable>();
+            if (current.Position != item.Position)
+            {
+                // update item positions for todo list
+                var items = await _context.TodoItems
+                    .Where(t => t.TodoListId == item.TodoListId)
+                    .OrderBy(t => t.Id)
+                    .ToListAsync<ISortable>();
+                EntityHelper.AdjustPositions(items, item);
+            }
 
-            EntityHelper.AdjustPositions(items, item);
             EntityHelper.UpdateFrom(current, item);
-
             _context.Update(current);
+
             await _context.SaveChangesAsync();
             return Ok(current);
         }

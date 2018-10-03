@@ -11,7 +11,8 @@ namespace TodoApi.Models
         {
             return lists.Select(list => new TodoListInfo() {
                 Id = list.Id,
-                Name = list.Name
+                Name = list.Name,
+                Position = list.Position
             }).ToList();
         }
 
@@ -51,12 +52,17 @@ namespace TodoApi.Models
             toItem.TodoListId = fromItem.TodoListId;
         }
 
+        public static void UpdateFrom(TodoListInfo toInfo, TodoListInfo fromInfo)
+        {
+            toInfo.Id = fromInfo.Id;
+            toInfo.Name = fromInfo.Name;
+            toInfo.Position = fromInfo.Position;
+        }
+
         public static void UpdateFrom(TodoList toList, TodoList fromList)
         {
-            // update properties
-            toList.Id = fromList.Id;
-            toList.Name = fromList.Name;
-            toList.Position = fromList.Position;
+            // update info
+            UpdateFrom(toList as TodoListInfo, fromList as TodoListInfo);
 
             // remove obsolete child items
             List<TodoListItem> items = new List<TodoListItem>(toList.Items);
