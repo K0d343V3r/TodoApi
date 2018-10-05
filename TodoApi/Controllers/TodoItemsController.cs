@@ -47,7 +47,7 @@ namespace TodoApi.Controllers
             // sort items based on requested position
             var items = await _context.TodoItems
                 .Where(t => t.TodoListId == item.TodoListId)
-                .OrderBy(t => t.Id)
+                .OrderBy(t => t.Position)
                 .ToListAsync<IEntityBase>();
             EntityHelper.AdjustPositions(item, items);
 
@@ -71,7 +71,7 @@ namespace TodoApi.Controllers
             // update item positions for todo list
             var items = await _context.TodoItems
                 .Where(t => t.TodoListId == item.TodoListId)
-                .OrderBy(t => t.Id)
+                .OrderBy(t => t.Position)
                 .ToListAsync<IEntityBase>();
             EntityHelper.AdjustPositions(item, items, current);
 
