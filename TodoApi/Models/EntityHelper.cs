@@ -16,7 +16,7 @@ namespace TodoApi.Models
             }).ToList();
         }
 
-        public static void AdjustPositions(IList<ISortable> items, ISortable item)
+        public static void AdjustPositions(IEntityBase item, IList<IEntityBase> items, IEntityBase current = null)
         {
             if (items.Count == 0)
             {
@@ -25,20 +25,27 @@ namespace TodoApi.Models
             }
             else if (item.Position >= items.Count)
             {
-                // one higher than last in list
+                // requested position is beyond the last item
                 item.Position = items[items.Count - 1].Position + 1;
             }
-            else
+            else if (current == null || current.Id != items[item.Position].Id)
             {
-                // save current position for later
+                int startIndex = item.Position;
+                int endPosition = current == null ? items[items.Count - 1].Position : current.Position;
+                int step = endPosition >= items[startIndex].Position ? 1 : -1;
+
                 int position = items[item.Position].Position;
-                for (int i = item.Position; i < items.Count; i++)
+ 
+                for (int i = startIndex; ; i += step)
                 {
-                    // make room for the new entry
-                    items[i].Position++;
+                    int currentPosition = items[i].Position;
+                    items[i].Position += step;
+                    if (currentPosition == endPosition)
+                    {
+                        break;
+                    }
                 }
 
-                // new entry should be at this position
                 item.Position = position;
             }
         }

@@ -40,12 +40,9 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            if (current.Position != info.Position)
-            {
-                // adjust list positions based on update request
-                var lists = await _context.TodoLists.OrderBy(t => t.Position).ToListAsync<ISortable>();
-                EntityHelper.AdjustPositions(lists, info);
-            }
+            // adjust list positions based on update request
+            var lists = await _context.TodoLists.OrderBy(t => t.Position).ToListAsync<IEntityBase>();
+            EntityHelper.AdjustPositions(info, lists, current);
 
             EntityHelper.UpdateFrom(current, info);
             _context.Update(current);

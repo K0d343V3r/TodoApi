@@ -2,7 +2,7 @@
 
 namespace TodoApi.Models
 {
-    public class TodoListItem : ISortable
+    public class TodoListItem : IEntityBase
     {
         public long Id { get; set; }
         public string Task { get; set; }

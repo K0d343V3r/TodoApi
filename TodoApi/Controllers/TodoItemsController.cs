@@ -44,15 +44,16 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateItemAsync([FromBody] TodoListItem item)
         {
+            // sort items based on requested position
             var items = await _context.TodoItems
                 .Where(t => t.TodoListId == item.TodoListId)
                 .OrderBy(t => t.Id)
-                .ToListAsync<ISortable>();
+                .ToListAsync<IEntityBase>();
+            EntityHelper.AdjustPositions(item, items);
 
-            EntityHelper.AdjustPositions(items, item);
             await _context.TodoItems.AddAsync(item);
-
             await _context.SaveChangesAsync();
+
             return CreatedAtRoute("GetItem", new { id = item.Id }, item);
         }
 
@@ -67,15 +68,12 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            if (current.Position != item.Position)
-            {
-                // update item positions for todo list
-                var items = await _context.TodoItems
-                    .Where(t => t.TodoListId == item.TodoListId)
-                    .OrderBy(t => t.Id)
-                    .ToListAsync<ISortable>();
-                EntityHelper.AdjustPositions(items, item);
-            }
+            // update item positions for todo list
+            var items = await _context.TodoItems
+                .Where(t => t.TodoListId == item.TodoListId)
+                .OrderBy(t => t.Id)
+                .ToListAsync<IEntityBase>();
+            EntityHelper.AdjustPositions(item, items, current);
 
             EntityHelper.UpdateFrom(current, item);
             _context.Update(current);

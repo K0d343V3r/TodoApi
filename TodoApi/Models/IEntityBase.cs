@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace TodoApi.Models
 {
-    public interface ISortable
+    public interface IEntityBase
     {
-         int Position { get; set; }
+        long Id { get; set; }
+        int Position { get; set; }
     }
 }

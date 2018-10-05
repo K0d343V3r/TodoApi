@@ -76,9 +76,9 @@ namespace TodoApi.Controllers
                 list.Items[i].Position = i;
             }
 
-            // adjust list positions based on newly inserted list
-            var lists = await _context.TodoLists.OrderBy(t => t.Position).ToListAsync<ISortable>();
-            EntityHelper.AdjustPositions(lists, list);
+            // sort lists based on requested position
+            var lists = await _context.TodoLists.OrderBy(t => t.Position).ToListAsync<IEntityBase>();
+            EntityHelper.AdjustPositions(list, lists);
 
             await _context.TodoLists.AddAsync(list);
             await _context.SaveChangesAsync();
@@ -104,11 +104,12 @@ namespace TodoApi.Controllers
             }
 
             // adjust list positions based on newly updated list
-            var lists = await _context.TodoLists.OrderBy(t => t.Position).ToListAsync<ISortable>();
-            EntityHelper.AdjustPositions(lists, list);
-            EntityHelper.UpdateFrom(current, list);
+            var lists = await _context.TodoLists.OrderBy(t => t.Position).ToListAsync<IEntityBase>();
+            EntityHelper.AdjustPositions(list, lists, current);
 
+            EntityHelper.UpdateFrom(current, list);
             _context.Update(current);
+
             await _context.SaveChangesAsync();
             return Ok(current);
         }
