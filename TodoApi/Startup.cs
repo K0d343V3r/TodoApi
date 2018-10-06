@@ -16,16 +16,25 @@ namespace TodoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // add CORS support
             services.AddCors();
+
+            // set target .NET Core version
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            // read connection string from configuration
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json")
                 .Build();
 
+            // register database context
             services.AddDbContext<TodoContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+            // add dependency injected data services
+            services.AddScoped<ITodoRepositoryContext, TodoRepositoryContext>();
+            services.AddScoped<ITodoRepositoryContext, TodoRepositoryContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -6,10 +6,9 @@ using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public class TodoListInfo : IEntityBase
+    public interface ITodoRepositoryContext : IRepositoryContext
     {
-        public long Id { get; set; }
-        public string Name { get; set; }
-        public int Position { get; set; }
+        IRepository<TodoList> TodoLists { get; }
+        IRepository<TodoListItem> TodoItems { get; }
     }
 }

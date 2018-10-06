@@ -1,12 +1,10 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using TodoApi.Models;
+using TodoApi.Repository;
 
 namespace TodoApi.Controllers
 {
@@ -14,9 +12,9 @@ namespace TodoApi.Controllers
     [ApiController]
     public class TodoItemsController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly ITodoRepositoryContext _context;
 
-        public TodoItemsController(TodoContext context)
+        public TodoItemsController(ITodoRepositoryContext context)
         {
             _context = context;
         }
@@ -24,13 +22,13 @@ namespace TodoApi.Controllers
         [HttpGet]
         public async Task<ActionResult<List<TodoListItem>>> GetAllItemsAsync()
         {
-            return await _context.TodoItems.OrderBy(s => s.Position).ToListAsync();
+            return await _context.TodoItems.GetAsync();
         }
 
         [HttpGet("{id}", Name = "GetItem")]
         public async Task<ActionResult<TodoListItem>> GetItemAsync(long id)
         {
-            var item = await _context.TodoItems.FirstOrDefaultAsync(m => m.Id == id);
+            var item = await _context.TodoItems.GetAsync(id);
             if (item == null)
             {
                 return NotFound();
@@ -45,11 +43,8 @@ namespace TodoApi.Controllers
         public async Task<IActionResult> CreateItemAsync([FromBody] TodoListItem item)
         {
             // sort items based on requested position
-            var items = await _context.TodoItems
-                .Where(t => t.TodoListId == item.TodoListId)
-                .OrderBy(t => t.Position)
-                .ToListAsync<IEntityBase>();
-            EntityHelper.AdjustPositions(item, items);
+            var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
+            EntityHelper.AdjustPositions(item, items.ToList<IEntityBase>());
 
             await _context.TodoItems.AddAsync(item);
             await _context.SaveChangesAsync();
@@ -62,21 +57,18 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateItemAsync(long id, [FromBody] TodoListItem item)
         {
-            var current = await _context.TodoItems.FindAsync(id);
+            var current = await _context.TodoItems.GetAsync(id);
             if (current == null)
             {
                 return NotFound();
             }
 
             // update item positions for todo list
-            var items = await _context.TodoItems
-                .Where(t => t.TodoListId == item.TodoListId)
-                .OrderBy(t => t.Position)
-                .ToListAsync<IEntityBase>();
-            EntityHelper.AdjustPositions(item, items, current);
+            var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
+            EntityHelper.AdjustPositions(item, items.ToList<IEntityBase>(), current);
 
             EntityHelper.UpdateFrom(current, item);
-            _context.Update(current);
+            _context.TodoItems.Update(current);
 
             await _context.SaveChangesAsync();
             return Ok(current);
@@ -85,14 +77,14 @@ namespace TodoApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteItemAsync(long id)
         {
-            var item = await _context.TodoItems.FindAsync(id);
+            var item = await _context.TodoItems.GetAsync(id);
             if (item == null)
             {
                 return NotFound();
             }
             else
             {
-                _context.TodoItems.Remove(item);
+                _context.TodoItems.Delete(item);
                 await _context.SaveChangesAsync();
                 return NoContent();
             }
@@ -104,18 +96,17 @@ namespace TodoApi.Controllers
             var items = new List<TodoListItem>();
             foreach (var id in ids)
             {
-                var list = await _context.TodoItems.FindAsync(id);
+                var list = await _context.TodoItems.GetAsync(id);
                 if (list == null)
                 {
                     return NotFound();
                 }
                 else
                 {
-                    items.Add(list);
+                    _context.TodoItems.Delete(list);
                 }
             }
 
-            _context.TodoItems.RemoveRange(items);
             await _context.SaveChangesAsync();
             return NoContent();
         }

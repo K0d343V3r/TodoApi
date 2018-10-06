@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using TodoApi.Models;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Threading.Tasks;
+using TodoApi.Models;
+using TodoApi.Repository;
 
 namespace TodoApi.Controllers
 {
@@ -13,9 +12,9 @@ namespace TodoApi.Controllers
     [ApiController]
     public class TodoListInfosController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly ITodoRepositoryContext _context;
 
-        public TodoListInfosController(TodoContext context)
+        public TodoListInfosController(ITodoRepositoryContext context)
         {
             _context = context;
         }
@@ -23,10 +22,7 @@ namespace TodoApi.Controllers
         [HttpGet]
         public async Task<ActionResult<List<TodoListInfo>>> GetAllListInfosAsync()
         {
-            List<TodoList> lists = await _context.TodoLists
-                .OrderBy(s => s.Position)
-                .ToListAsync();
-            return EntityHelper.ToListInfos(lists);
+            return EntityHelper.ToListInfos(await _context.TodoLists.GetAsync());
         }
 
         [HttpPut("{id}")]
@@ -34,18 +30,19 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateListInfoAsync(long id, [FromBody] TodoListInfo info)
         {
-            var current = await _context.TodoLists.FindAsync(id);
+            var current = await _context.TodoLists.GetAsync(id);
             if (current == null)
             {
                 return NotFound();
             }
 
             // adjust list positions based on update request
-            var lists = await _context.TodoLists.OrderBy(t => t.Position).ToListAsync<IEntityBase>();
-            EntityHelper.AdjustPositions(info, lists, current);
+            var lists = await _context.TodoLists.GetAsync();
+            EntityHelper.AdjustPositions(info, lists.ToList<IEntityBase>(), current);
 
+            // update list entity
             EntityHelper.UpdateFrom(current, info);
-            _context.Update(current);
+            _context.TodoLists.Update(current);
 
             await _context.SaveChangesAsync();
             return Ok(current);
