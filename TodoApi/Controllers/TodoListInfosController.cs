@@ -38,13 +38,12 @@ namespace TodoApi.Controllers
 
             // adjust list positions based on update request
             var lists = await _context.TodoLists.GetAsync();
-            EntityHelper.AdjustPositions(info, lists.ToList<IEntityBase>(), current);
-
-            // update list entity
+            EntityHelper.AdjustListInfoPositions(info, lists.ToList<IEntityBase>(), current);
             EntityHelper.UpdateFrom(current, info);
-            _context.TodoLists.Update(current);
 
+            _context.TodoLists.Update(current);
             await _context.SaveChangesAsync();
+
             return Ok(current);
         }
     }

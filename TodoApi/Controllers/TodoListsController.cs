@@ -66,15 +66,8 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateListAsync([FromBody] TodoList list)
         {
-            // use list position for child items
-            for (int i = 0; i < list.Items.Count; i++)
-            {
-                list.Items[i].Position = i;
-            }
-
-            // sort lists based on requested position
             var lists = await _context.TodoLists.GetAsync();
-            EntityHelper.AdjustPositions(list, lists.ToList<IEntityBase>());
+            EntityHelper.AdjustListPosition(list, lists.ToList<IEntityBase>(), true);
 
             await _context.TodoLists.AddAsync(list);
             await _context.SaveChangesAsync();
@@ -93,19 +86,11 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            // use list position for child items
-            for (int i = 0; i < list.Items.Count; i++)
-            {
-                list.Items[i].Position = i;
-            }
-
-            // adjust list positions based on newly updated list
             var lists = await _context.TodoLists.GetAsync();
-            EntityHelper.AdjustPositions(list, lists.ToList<IEntityBase>(), current);
-
+            EntityHelper.AdjustListPositions(list, lists.ToList<IEntityBase>(), current);
             EntityHelper.UpdateFrom(current, list);
-            _context.TodoLists.Update(current);
 
+            _context.TodoLists.Update(current);
             await _context.SaveChangesAsync();
             return Ok(current);
         }
@@ -120,8 +105,12 @@ namespace TodoApi.Controllers
             }
             else
             {
+                var lists = await _context.TodoLists.GetAsync();
+                EntityHelper.AdjustEntityPositions(lists.ToList<IEntityBase>(), list.Position, false);
+
                 _context.TodoLists.Delete(list);
                 await _context.SaveChangesAsync();
+
                 return NoContent();
             }
         }
@@ -129,21 +118,23 @@ namespace TodoApi.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteListsAsync([FromQuery(Name ="id")] List<long> ids)
         {
-            var lists = new List<TodoList>();
+            var lists = await _context.TodoLists.GetAsync();
             foreach (var id in ids)
             {
-                var list = await _context.TodoLists.GetAsync(id);
+                var list = lists.FirstOrDefault(t => t.Id == id);
                 if (list == null)
                 {
                     return NotFound();
                 }
                 else
                 {
+                    EntityHelper.AdjustEntityPositions(lists.ToList<IEntityBase>(), list.Position, false);
                     _context.TodoLists.Delete(list);
                 }
             }
-            
+
             await _context.SaveChangesAsync();
+
             return NoContent();
         }
     }

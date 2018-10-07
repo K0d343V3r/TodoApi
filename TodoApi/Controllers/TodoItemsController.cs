@@ -44,7 +44,7 @@ namespace TodoApi.Controllers
         {
             // sort items based on requested position
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-            EntityHelper.AdjustPositions(item, items.ToList<IEntityBase>());
+            EntityHelper.AdjustListItemPosition(item, items.ToList<IEntityBase>(), true);
 
             await _context.TodoItems.AddAsync(item);
             await _context.SaveChangesAsync();
@@ -65,12 +65,12 @@ namespace TodoApi.Controllers
 
             // update item positions for todo list
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-            EntityHelper.AdjustPositions(item, items.ToList<IEntityBase>(), current);
-
+            EntityHelper.AdjustListItemPositions(item, items.ToList<IEntityBase>(), current);
             EntityHelper.UpdateFrom(current, item);
-            _context.TodoItems.Update(current);
 
+            _context.TodoItems.Update(current);
             await _context.SaveChangesAsync();
+
             return Ok(current);
         }
 
@@ -84,8 +84,12 @@ namespace TodoApi.Controllers
             }
             else
             {
+                var items = await _context.TodoItems.GetAsync();
+                EntityHelper.AdjustEntityPositions(items.ToList<IEntityBase>(), item.Position, false);
+
                 _context.TodoItems.Delete(item);
                 await _context.SaveChangesAsync();
+
                 return NoContent();
             }
         }
@@ -93,17 +97,18 @@ namespace TodoApi.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteItemsAsync([FromQuery(Name = "id")] List<long> ids)
         {
-            var items = new List<TodoListItem>();
+            var items = await _context.TodoItems.GetAsync();
             foreach (var id in ids)
             {
-                var list = await _context.TodoItems.GetAsync(id);
-                if (list == null)
+                var item = items.FirstOrDefault(t => t.Id == id);
+                if (item == null)
                 {
                     return NotFound();
                 }
                 else
                 {
-                    _context.TodoItems.Delete(list);
+                    EntityHelper.AdjustEntityPositions(items.ToList<IEntityBase>(), item.Position, false);
+                    _context.TodoItems.Delete(item);
                 }
             }
 

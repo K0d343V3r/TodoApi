@@ -6,7 +6,7 @@ using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public static class EntityHelper
+    internal static class EntityHelper
     {
         public static List<TodoListInfo> ToListInfos(IList<TodoList> lists)
         {
@@ -17,38 +17,93 @@ namespace TodoApi.Models
             }).ToList();
         }
 
-        public static void AdjustPositions(IEntityBase item, IList<IEntityBase> items, IEntityBase current = null)
+        public static void AdjustListPosition(TodoList list, IList<IEntityBase> lists, bool add)
         {
-            if (items.Count == 0)
-            {
-                // list is empty, put item in first position
-                item.Position = 0;
-            }
-            else if (item.Position >= items.Count)
-            {
-                // requested position is beyond the last item
-                item.Position = items[items.Count - 1].Position + 1;
-            }
-            else if (current == null || current.Id != items[item.Position].Id)
-            {
-                int startIndex = item.Position;
-                int endPosition = current == null ? items[items.Count - 1].Position : current.Position;
-                int step = endPosition >= items[startIndex].Position ? 1 : -1;
+            AdjustListPositionInternal(list, lists.Count);
 
-                int position = items[item.Position].Position;
- 
-                for (int i = startIndex; ; i += step)
+            AdjustEntityPositions(lists, list.Position, add);
+        }
+
+        private static void AdjustListPositionInternal(TodoList list, int count)
+        {
+            AdjustEntityPosition(list, count);
+
+            for (int i = 0; i < list.Items.Count; i++)
+            {
+                list.Items[i].Position = i;
+            }
+        }
+
+        private static void AdjustEntityPosition(IEntityBase entity, int count)
+        {
+            if (entity.Position < 0)
+            {
+                entity.Position = 0;
+            }
+            if (entity.Position > count)
+            {
+                entity.Position = count;
+            }
+        }
+
+        public static void AdjustListItemPosition(TodoListItem item, IList<IEntityBase> items, bool add)
+        {
+            AdjustEntityPosition(item, items.Count);
+
+            AdjustEntityPositions(items, item.Position, add);
+        }
+
+        public static void AdjustEntityPositions(IList<IEntityBase> list, int position, bool add)
+        {
+            for (int i = add ? position : position + 1; i < list.Count; i++)
+            {
+                list[i].Position = add ? list[i].Position + 1 : list[i].Position - 1;
+            }
+        }
+
+        public static void AdjustListPositions(TodoList newList, IList<IEntityBase> lists, TodoList currentList)
+        {
+            AdjustListPositionInternal(newList, lists.Count);
+
+            AdjustEntityPositions(lists, currentList.Position, newList.Position);
+        }
+
+        private static void AdjustEntityPositions(IList<IEntityBase> list, int oldPosition, int newPosition)
+        {
+            if (newPosition != oldPosition)
+            {
+                int start, end, step;
+                if (newPosition < oldPosition)
                 {
-                    int currentPosition = items[i].Position;
-                    items[i].Position += step;
-                    if (currentPosition == endPosition)
-                    {
-                        break;
-                    }
+                    start = newPosition;
+                    end = oldPosition - 1;
+                    step = 1;
                 }
-
-                item.Position = position;
+                else
+                {
+                    start = oldPosition + 1;
+                    end = newPosition;
+                    step = -1;
+                }
+                for (int i = start; i <= end; i++)
+                {
+                    list[i].Position += step;
+                }
             }
+        }
+
+        public static void AdjustListItemPositions(TodoListItem newListItem, IList<IEntityBase> items, TodoListItem currentItem)
+        {
+            AdjustEntityPosition(newListItem, items.Count);
+
+            AdjustEntityPositions(items, currentItem.Position, newListItem.Position);
+        }
+
+        public static void AdjustListInfoPositions(TodoListInfo newInfo, IList<IEntityBase> infos, TodoListInfo currentInfo)
+        {
+            AdjustEntityPosition(newInfo, infos.Count);
+
+            AdjustEntityPositions(infos, currentInfo.Position, newInfo.Position);
         }
 
         public static void UpdateFrom(TodoListItem toItem, TodoListItem fromItem)
