@@ -10,11 +10,17 @@ namespace TodoApi.Models
     {
         public static List<TodoListInfo> ToListInfos(IList<TodoList> lists)
         {
-            return lists.Select(list => new TodoListInfo() {
+            return lists.Select(list => ToListInfo(list)).ToList();
+        }
+
+        public static TodoListInfo ToListInfo(TodoList list)
+        {
+            return new TodoListInfo(list.Items.Count)
+            {
                 Id = list.Id,
                 Name = list.Name,
                 Position = list.Position
-            }).ToList();
+            };
         }
 
         public static void AdjustListPosition(TodoList list, IList<IEntityBase> lists, bool add)

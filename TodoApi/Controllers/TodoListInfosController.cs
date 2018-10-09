@@ -22,7 +22,19 @@ namespace TodoApi.Controllers
         [HttpGet]
         public async Task<ActionResult<List<TodoListInfo>>> GetAllListInfosAsync()
         {
-            return EntityHelper.ToListInfos(await _context.TodoLists.GetAsync());
+            return EntityHelper.ToListInfos(await _context.TodoLists.GetAsync(s => s.Items));
+        }
+
+        [HttpGet("{id}", Name = "GetListInfo")]
+        public async Task<ActionResult<TodoListInfo>> GetListInfoAsync(long id)
+        {
+            var list = await _context.TodoLists.GetAsync(id, s => s.Items);
+            if (list == null)
+            {
+                return NotFound();
+            }
+
+            return EntityHelper.ToListInfo(list);
         }
 
         [HttpPut("{id}")]
@@ -44,7 +56,7 @@ namespace TodoApi.Controllers
             _context.TodoLists.Update(current);
             await _context.SaveChangesAsync();
 
-            return Ok(current);
+            return Ok(EntityHelper.ToListInfo(current));
         }
     }
 }

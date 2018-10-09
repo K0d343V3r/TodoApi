@@ -9,6 +9,8 @@ namespace TodoApi.Models
     {
         public List<TodoListItem> Items { get; set; }
 
+        public override int ItemCount => Items != null ? Items.Count : 0;
+
         public TodoList()
         {
             Items = new List<TodoListItem>();
