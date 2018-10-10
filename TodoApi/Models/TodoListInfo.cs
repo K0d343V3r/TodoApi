@@ -7,22 +7,11 @@ using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public class TodoListInfo : IEntityBase
+    public class TodoListInfo : ITodoListBase
     {
         public long Id { get; set; }
-        public string Name { get; set; }
         public int Position { get; set; }
-
-        [NotMapped]
-        public virtual int ItemCount { get; private set; }
-
-        public TodoListInfo()
-        {
-        }
-
-        public TodoListInfo(int itemCount)
-        {
-            ItemCount = itemCount;
-        }
+        public string Name { get; set; }
+        public int ItemCount { get; internal set; }
     }
 }

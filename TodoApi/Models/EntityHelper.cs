@@ -15,11 +15,12 @@ namespace TodoApi.Models
 
         public static TodoListInfo ToListInfo(TodoList list)
         {
-            return new TodoListInfo(list.Items.Count)
+            return new TodoListInfo()
             {
                 Id = list.Id,
                 Name = list.Name,
-                Position = list.Position
+                Position = list.Position,
+                ItemCount = list.Items.Count
             };
         }
 
@@ -105,11 +106,11 @@ namespace TodoApi.Models
             AdjustEntityPositions(items, currentItem.Position, newListItem.Position);
         }
 
-        public static void AdjustListInfoPositions(TodoListInfo newInfo, IList<IEntityBase> infos, TodoListInfo currentInfo)
+        public static void AdjustListInfoPositions(TodoListInfo newInfo, IList<IEntityBase> infos, TodoList currentList)
         {
             AdjustEntityPosition(newInfo, infos.Count);
 
-            AdjustEntityPositions(infos, currentInfo.Position, newInfo.Position);
+            AdjustEntityPositions(infos, currentList.Position, newInfo.Position);
         }
 
         public static void UpdateFrom(TodoListItem toItem, TodoListItem fromItem)
@@ -121,17 +122,17 @@ namespace TodoApi.Models
             toItem.TodoListId = fromItem.TodoListId;
         }
 
-        public static void UpdateFrom(TodoListInfo toInfo, TodoListInfo fromInfo)
+        public static void UpdateFrom(ITodoListBase toList, ITodoListBase fromListBase)
         {
-            toInfo.Id = fromInfo.Id;
-            toInfo.Name = fromInfo.Name;
-            toInfo.Position = fromInfo.Position;
+            toList.Id = fromListBase.Id;
+            toList.Name = fromListBase.Name;
+            toList.Position = fromListBase.Position;
         }
 
         public static void UpdateFrom(TodoList toList, TodoList fromList)
         {
             // update info
-            UpdateFrom(toList as TodoListInfo, fromList as TodoListInfo);
+            UpdateFrom(toList as ITodoListBase, fromList as ITodoListBase);
 
             // remove obsolete child items
             List<TodoListItem> items = new List<TodoListItem>(toList.Items);
