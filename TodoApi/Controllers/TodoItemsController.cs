@@ -44,7 +44,7 @@ namespace TodoApi.Controllers
         {
             // sort items based on requested position
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-            EntityHelper.AdjustListItemPosition(item, items.ToList<IEntityBase>(), true);
+            EntityHelper.AdjustListItemPosition(item, items.ToList<EntityBase>(), true);
 
             await _context.TodoItems.AddAsync(item);
             await _context.SaveChangesAsync();
@@ -65,7 +65,7 @@ namespace TodoApi.Controllers
 
             // update item positions for todo list
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-            EntityHelper.AdjustListItemPositions(item, items.ToList<IEntityBase>(), current);
+            EntityHelper.AdjustListItemPositions(item, items.ToList<EntityBase>(), current);
             EntityHelper.UpdateFrom(current, item);
 
             _context.TodoItems.Update(current);
@@ -84,8 +84,8 @@ namespace TodoApi.Controllers
             }
             else
             {
-                var items = await _context.TodoItems.GetAsync();
-                EntityHelper.AdjustEntityPositions(items.ToList<IEntityBase>(), item.Position, false);
+                var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
+                EntityHelper.AdjustEntityPositions(items.ToList<EntityBase>(), item.Position, false);
 
                 _context.TodoItems.Delete(item);
                 await _context.SaveChangesAsync();
@@ -97,17 +97,17 @@ namespace TodoApi.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteItemsAsync([FromQuery(Name = "id")] List<long> ids)
         {
-            var items = await _context.TodoItems.GetAsync();
             foreach (var id in ids)
             {
-                var item = items.FirstOrDefault(t => t.Id == id);
+                var item = await _context.TodoItems.GetAsync(id);
                 if (item == null)
                 {
                     return NotFound();
                 }
                 else
                 {
-                    EntityHelper.AdjustEntityPositions(items.ToList<IEntityBase>(), item.Position, false);
+                    var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
+                    EntityHelper.AdjustEntityPositions(items.ToList<EntityBase>(), item.Position, false);
                     _context.TodoItems.Delete(item);
                 }
             }

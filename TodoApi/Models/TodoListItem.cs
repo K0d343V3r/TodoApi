@@ -3,10 +3,8 @@ using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public class TodoListItem : IEntityBase
+    public class TodoListItem : EntityBase
     {
-        public long Id { get; set; }
-        public int Position { get; set; }
         public string Task { get; set; }
         public bool Done { get; set; }
         public long TodoListId { get; set; }

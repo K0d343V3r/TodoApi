@@ -67,7 +67,7 @@ namespace TodoApi.Controllers
         public async Task<IActionResult> CreateListAsync([FromBody] TodoList list)
         {
             var lists = await _context.TodoLists.GetAsync();
-            EntityHelper.AdjustListPosition(list, lists.ToList<IEntityBase>(), true);
+            EntityHelper.AdjustListPosition(list, lists.ToList<EntityBase>(), true);
 
             await _context.TodoLists.AddAsync(list);
             await _context.SaveChangesAsync();
@@ -87,7 +87,7 @@ namespace TodoApi.Controllers
             }
 
             var lists = await _context.TodoLists.GetAsync();
-            EntityHelper.AdjustListPositions(list, lists.ToList<IEntityBase>(), current);
+            EntityHelper.AdjustListPositions(list, lists.ToList<EntityBase>(), current);
             EntityHelper.UpdateFrom(current, list);
 
             _context.TodoLists.Update(current);
@@ -106,7 +106,7 @@ namespace TodoApi.Controllers
             else
             {
                 var lists = await _context.TodoLists.GetAsync();
-                EntityHelper.AdjustEntityPositions(lists.ToList<IEntityBase>(), list.Position, false);
+                EntityHelper.AdjustEntityPositions(lists.ToList<EntityBase>(), list.Position, false);
 
                 _context.TodoLists.Delete(list);
                 await _context.SaveChangesAsync();
@@ -128,7 +128,7 @@ namespace TodoApi.Controllers
                 }
                 else
                 {
-                    EntityHelper.AdjustEntityPositions(lists.ToList<IEntityBase>(), list.Position, false);
+                    EntityHelper.AdjustEntityPositions(lists.ToList<EntityBase>(), list.Position, false);
                     _context.TodoLists.Delete(list);
                 }
             }

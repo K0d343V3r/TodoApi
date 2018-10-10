@@ -8,7 +8,7 @@ using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public class TodoRepository<T> : DbRepository<T> where T : class, IEntityBase
+    public class TodoRepository<T> : DbRepository<T> where T : EntityBase
     {
         public TodoRepository(TodoContext context)
             : base(context)

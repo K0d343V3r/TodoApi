@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace TodoApi.Repository
 {
-    public interface IEntityBase
+    public class EntityBase
     {
-        long Id { get; set; }
-        int Position { get; set; }
+        public long Id { get; set; }
+        public int Position { get; set; }
     }
 }

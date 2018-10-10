@@ -6,8 +6,8 @@ using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public interface ITodoListBase : IEntityBase
+    public class TodoListBase : EntityBase
     {
-        string Name { get; set; }
+        public string Name { get; set; }
     }
 }

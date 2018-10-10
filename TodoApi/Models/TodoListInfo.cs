@@ -7,11 +7,8 @@ using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public class TodoListInfo : ITodoListBase
+    public class TodoListInfo : TodoListBase
     {
-        public long Id { get; set; }
-        public int Position { get; set; }
-        public string Name { get; set; }
         public int ItemCount { get; internal set; }
     }
 }

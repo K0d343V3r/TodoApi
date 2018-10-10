@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TodoApi.Repository
 {
-    public class DbRepository<T> : IRepository<T> where T : class, IEntityBase
+    public class DbRepository<T> : IRepository<T> where T : EntityBase
     {
         private readonly DbContext _context;
 

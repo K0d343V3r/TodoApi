@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TodoApi.Repository
 {
-    public interface IRepository<T> where T : class, IEntityBase
+    public interface IRepository<T> where T : EntityBase
     {
         Task<List<T>> GetAsync(params Expression<Func<T, object>>[] includePredicates);
         Task<List<T>> GetAsync(Expression<Func<T, bool>> wherePredicate, params Expression<Func<T, object>>[] includePredicates);
