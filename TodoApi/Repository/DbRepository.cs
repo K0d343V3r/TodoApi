@@ -48,7 +48,7 @@ namespace TodoApi.Repository
             return await set.Where(wherePredicate).OrderBy(t => t.Position).ToListAsync();
         }
 
-        public async Task<T> GetAsync(long id, params Expression<Func<T, object>>[] includePredicates)
+        public async Task<T> GetAsync(int id, params Expression<Func<T, object>>[] includePredicates)
         {
             IQueryable<T> set = _context.Set<T>();
             foreach (var predicate in includePredicates)

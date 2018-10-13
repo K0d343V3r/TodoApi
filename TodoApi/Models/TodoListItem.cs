@@ -7,6 +7,7 @@ namespace TodoApi.Models
     {
         public string Task { get; set; }
         public bool Done { get; set; }
-        public long TodoListId { get; set; }
+        public DateTime DueDate { get; set; } = default(DateTime);
+        public int TodoListId { get; set; }
     }
 }

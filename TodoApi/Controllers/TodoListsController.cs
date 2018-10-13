@@ -17,18 +17,6 @@ namespace TodoApi.Controllers
         public TodoListsController(ITodoRepositoryContext context)
         {
             _context = context;
-
-            //if (_context.TodoLists.Count() == 0)
-            //{
-            //    var todoList = new TodoList
-            //    {
-            //        Name = "List 1"
-            //    };
-            //    todoList.Items.Add(new TodoListItem() { Task = "Item 1", Position = 0 });
-            //    todoList.Items.Add(new TodoListItem() { Task = "Item 2", Position = 1 });
-            //    _context.TodoLists.Add(todoList);
-            //    _context.SaveChanges();
-            //}
         }
         
         [HttpGet]
@@ -40,7 +28,7 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet("{id}", Name = "GetList")]
-        public async Task<ActionResult<TodoList>> GetListAsync(long id)
+        public async Task<ActionResult<TodoList>> GetListAsync(int id)
         {
             var list = await FetchTodoListAsync(id);
             if (list == null)
@@ -51,7 +39,7 @@ namespace TodoApi.Controllers
             return list;
         }
 
-        private async Task<TodoList> FetchTodoListAsync(long id)
+        private async Task<TodoList> FetchTodoListAsync(int id)
         {
             TodoList list = await _context.TodoLists.GetAsync(id, s => s.Items);
             if (list != null)
@@ -78,7 +66,7 @@ namespace TodoApi.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(TodoList), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> UpdateListAsync(long id, [FromBody] TodoList list)
+        public async Task<IActionResult> UpdateListAsync(int id, [FromBody] TodoList list)
         {
             var current = await FetchTodoListAsync(id);
             if (current == null)
@@ -96,7 +84,7 @@ namespace TodoApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteListAsync(long id)
+        public async Task<IActionResult> DeleteListAsync(int id)
         {
             var list = await _context.TodoLists.GetAsync(id);
             if (list == null)
@@ -116,7 +104,7 @@ namespace TodoApi.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteListsAsync([FromQuery(Name ="id")] List<long> ids)
+        public async Task<IActionResult> DeleteListsAsync([FromQuery(Name ="id")] List<int> ids)
         {
             var lists = await _context.TodoLists.GetAsync();
             foreach (var id in ids)

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using NJsonSchema;
 using NSwag.AspNetCore;
 using System;
@@ -20,7 +21,13 @@ namespace TodoApi
             services.AddCors();
 
             // set target .NET Core version
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(options =>
+                {
+                    // dates stored in UTC in database, serialize them as such
+                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                });
 
             // read connection string from configuration
             IConfigurationRoot configuration = new ConfigurationBuilder()

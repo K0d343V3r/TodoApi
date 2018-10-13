@@ -26,7 +26,7 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet("{id}", Name = "GetListInfo")]
-        public async Task<ActionResult<TodoListInfo>> GetListInfoAsync(long id)
+        public async Task<ActionResult<TodoListInfo>> GetListInfoAsync(int id)
         {
             var list = await _context.TodoLists.GetAsync(id, s => s.Items);
             if (list == null)
@@ -40,7 +40,7 @@ namespace TodoApi.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(TodoListInfo), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> UpdateListInfoAsync(long id, [FromBody] TodoListInfo info)
+        public async Task<IActionResult> UpdateListInfoAsync(int id, [FromBody] TodoListInfo info)
         {
             var current = await _context.TodoLists.GetAsync(id);
             if (current == null)

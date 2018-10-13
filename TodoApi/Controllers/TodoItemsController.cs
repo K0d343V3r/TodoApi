@@ -26,7 +26,7 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet("{id}", Name = "GetItem")]
-        public async Task<ActionResult<TodoListItem>> GetItemAsync(long id)
+        public async Task<ActionResult<TodoListItem>> GetItemAsync(int id)
         {
             var item = await _context.TodoItems.GetAsync(id);
             if (item == null)
@@ -55,7 +55,7 @@ namespace TodoApi.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(TodoListItem), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> UpdateItemAsync(long id, [FromBody] TodoListItem item)
+        public async Task<IActionResult> UpdateItemAsync(int id, [FromBody] TodoListItem item)
         {
             var current = await _context.TodoItems.GetAsync(id);
             if (current == null)
@@ -75,7 +75,7 @@ namespace TodoApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteItemAsync(long id)
+        public async Task<IActionResult> DeleteItemAsync(int id)
         {
             var item = await _context.TodoItems.GetAsync(id);
             if (item == null)
@@ -95,7 +95,7 @@ namespace TodoApi.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteItemsAsync([FromQuery(Name = "id")] List<long> ids)
+        public async Task<IActionResult> DeleteItemsAsync([FromQuery(Name = "id")] List<int> ids)
         {
             foreach (var id in ids)
             {

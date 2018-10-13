@@ -7,7 +7,7 @@ namespace TodoApi.Repository
 {
     public class EntityBase
     {
-        public long Id { get; set; }
+        public int Id { get; set; }
         public int Position { get; set; }
     }
 }

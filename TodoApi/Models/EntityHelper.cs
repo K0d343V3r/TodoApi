@@ -113,25 +113,31 @@ namespace TodoApi.Models
             AdjustEntityPositions(infos, currentList.Position, newInfo.Position);
         }
 
+        public static void UpdateFrom(EntityBase toBase, EntityBase fromBase)
+        {
+            toBase.Id = fromBase.Id;
+            toBase.Position = fromBase.Position;
+        }
+
         public static void UpdateFrom(TodoListItem toItem, TodoListItem fromItem)
         {
-            toItem.Id = fromItem.Id;
+            UpdateFrom(toItem as EntityBase, fromItem as EntityBase);
+
             toItem.Task = fromItem.Task;
             toItem.Done = fromItem.Done;
-            toItem.Position = fromItem.Position;
+            toItem.DueDate = fromItem.DueDate;
             toItem.TodoListId = fromItem.TodoListId;
         }
 
         public static void UpdateFrom(TodoListBase toListBase, TodoListBase fromListBase)
         {
-            toListBase.Id = fromListBase.Id;
+            UpdateFrom(toListBase as EntityBase, fromListBase as EntityBase);
+
             toListBase.Name = fromListBase.Name;
-            toListBase.Position = fromListBase.Position;
         }
 
         public static void UpdateFrom(TodoList toList, TodoList fromList)
         {
-            // update info
             UpdateFrom(toList as TodoListBase, fromList as TodoListBase);
 
             // remove obsolete child items
