@@ -8,19 +8,14 @@ namespace TodoApi.Models
 {
     internal static class EntityHelper
     {
-        public static List<TodoElement> ToListElements(IList<TodoList> lists)
-        {
-            return lists.Select(list => ToListElement(list)).ToList();
-        }
-
-        public static TodoElement ToListElement(TodoList list)
+        public static TodoElement ToElement(TodoElementBase element, int childCount)
         {
             return new TodoElement()
             {
-                Id = list.Id,
-                Name = list.Name,
-                Position = list.Position,
-                ChildCount = list.Items.Count
+                Id = element.Id,
+                Name = element.Name,
+                Position = element.Position,
+                ChildCount = childCount
             };
         }
 
@@ -53,18 +48,18 @@ namespace TodoApi.Models
             }
         }
 
-        public static void AdjustListItemPosition(TodoListItem item, IList<EntityBase> items, bool add)
+        public static void AdjustEntityPosition(EntityBase entity, IList<EntityBase> entities, bool add)
         {
-            AdjustEntityPosition(item, items.Count);
+            AdjustEntityPosition(entity, entities.Count);
 
-            AdjustEntityPositions(items, item.Position, add);
+            AdjustEntityPositions(entities, entity.Position, add);
         }
 
-        public static void AdjustEntityPositions(IList<EntityBase> list, int position, bool add)
+        public static void AdjustEntityPositions(IList<EntityBase> entities, int position, bool add)
         {
-            for (int i = add ? position : position + 1; i < list.Count; i++)
+            for (int i = add ? position : position + 1; i < entities.Count; i++)
             {
-                list[i].Position = add ? list[i].Position + 1 : list[i].Position - 1;
+                entities[i].Position = add ? entities[i].Position + 1 : entities[i].Position - 1;
             }
         }
 
@@ -99,18 +94,12 @@ namespace TodoApi.Models
             }
         }
 
-        public static void AdjustListItemPositions(TodoListItem newListItem, IList<EntityBase> items, TodoListItem currentItem)
+        public static void AdjustEntityPositions(
+            EntityBase newEntity, IList<EntityBase> entities, EntityBase currentEntity)
         {
-            AdjustEntityPosition(newListItem, items.Count);
+            AdjustEntityPosition(newEntity, entities.Count);
 
-            AdjustEntityPositions(items, currentItem.Position, newListItem.Position);
-        }
-
-        public static void AdjustListElementPositions(TodoElement newElement, IList<EntityBase> elements, TodoList currentList)
-        {
-            AdjustEntityPosition(newElement, elements.Count);
-
-            AdjustEntityPositions(elements, currentList.Position, newElement.Position);
+            AdjustEntityPositions(entities, currentEntity.Position, newEntity.Position);
         }
 
         public static void UpdateFrom(EntityBase toBase, EntityBase fromBase)

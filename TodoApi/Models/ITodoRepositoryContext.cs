@@ -10,5 +10,6 @@ namespace TodoApi.Models
     {
         IRepository<TodoList> TodoLists { get; }
         IRepository<TodoListItem> TodoItems { get; }
+        IRepository<TodoQuery> TodoQueries { get; }
     }
 }

@@ -9,11 +9,7 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\ValuesController.cs" />
-    <Compile Remove="Models\QueryOperand.cs" />
-    <Compile Remove="Models\QueryOperator.cs" />
     <Compile Remove="Models\QueryValue.cs" />
-    <Compile Remove="Models\TodoListItemReference.cs" />
-    <Compile Remove="Models\TodoQuery.cs" />
     <Compile Remove="Models\TodoQueryBase.cs" />
   </ItemGroup>
 

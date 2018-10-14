@@ -22,7 +22,17 @@ namespace TodoApi.Controllers
         [HttpGet("lists")]
         public async Task<ActionResult<List<TodoElement>>> GetAllListElementsAsync()
         {
-            return EntityHelper.ToListElements(await _context.TodoLists.GetAsync(s => s.Items));
+            var lists = await _context.TodoLists.GetAsync(s => s.Items);
+            return lists.Select(list => EntityHelper.ToElement(list, list.Items.Count)).ToList();
+        }
+
+        [HttpGet("queries")]
+        public async Task<ActionResult<List<TodoElement>>> GetAllQueryElementsAsync()
+        {
+            var queries = await _context.TodoQueries.GetAsync();
+            // TODO: get childCount once query results are persisted
+            var childCount = 0;
+            return queries.Select(query => EntityHelper.ToElement(query, childCount)).ToList();
         }
 
         [HttpGet("lists/{id}", Name = "GetListElement")]
@@ -34,7 +44,21 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            return EntityHelper.ToListElement(list);
+            return EntityHelper.ToElement(list, list.Items.Count);
+        }
+
+        [HttpGet("queries/{id}", Name = "GetQueryElement")]
+        public async Task<ActionResult<TodoElement>> GetQueryElementAsync(int id)
+        {
+            var query = await _context.TodoQueries.GetAsync(id);
+            if (query == null)
+            {
+                return NotFound();
+            }
+
+            // TODO: get childCount once query results are persisted
+            var childCount = 0;
+            return EntityHelper.ToElement(query, childCount);
         }
 
         [HttpPut("lists/{id}")]
@@ -50,13 +74,37 @@ namespace TodoApi.Controllers
 
             // adjust list positions based on update request
             var lists = await _context.TodoLists.GetAsync();
-            EntityHelper.AdjustListElementPositions(element, lists.ToList<EntityBase>(), current);
+            EntityHelper.AdjustEntityPositions(element, lists.ToList<EntityBase>(), current);
             EntityHelper.UpdateFrom(current, element);
 
             _context.TodoLists.Update(current);
             await _context.SaveChangesAsync();
 
-            return Ok(EntityHelper.ToListElement(current));
+            return Ok(EntityHelper.ToElement(current, current.Items.Count));
+        }
+
+        [HttpPut("queries/{id}")]
+        [ProducesResponseType(typeof(TodoElement), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateQueryElementAsync(int id, [FromBody] TodoElement element)
+        {
+            var current = await _context.TodoQueries.GetAsync(id);
+            if (current == null)
+            {
+                return NotFound();
+            }
+
+            // adjust list positions based on update request
+            var queries = await _context.TodoQueries.GetAsync();
+            EntityHelper.AdjustEntityPositions(element, queries.ToList<EntityBase>(), current);
+            EntityHelper.UpdateFrom(current, element);
+
+            _context.TodoQueries.Update(current);
+            await _context.SaveChangesAsync();
+
+            // TODO: get childCount once query results are persisted
+            var childCount = 0;
+            return Ok(EntityHelper.ToElement(current, childCount));
         }
     }
 }
