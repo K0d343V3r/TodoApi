@@ -8,19 +8,19 @@ namespace TodoApi.Models
 {
     internal static class EntityHelper
     {
-        public static List<TodoListInfo> ToListInfos(IList<TodoList> lists)
+        public static List<TodoElement> ToListElements(IList<TodoList> lists)
         {
-            return lists.Select(list => ToListInfo(list)).ToList();
+            return lists.Select(list => ToListElement(list)).ToList();
         }
 
-        public static TodoListInfo ToListInfo(TodoList list)
+        public static TodoElement ToListElement(TodoList list)
         {
-            return new TodoListInfo()
+            return new TodoElement()
             {
                 Id = list.Id,
                 Name = list.Name,
                 Position = list.Position,
-                ItemCount = list.Items.Count
+                ChildCount = list.Items.Count
             };
         }
 
@@ -106,11 +106,11 @@ namespace TodoApi.Models
             AdjustEntityPositions(items, currentItem.Position, newListItem.Position);
         }
 
-        public static void AdjustListInfoPositions(TodoListInfo newInfo, IList<EntityBase> infos, TodoList currentList)
+        public static void AdjustListElementPositions(TodoElement newElement, IList<EntityBase> elements, TodoList currentList)
         {
-            AdjustEntityPosition(newInfo, infos.Count);
+            AdjustEntityPosition(newElement, elements.Count);
 
-            AdjustEntityPositions(infos, currentList.Position, newInfo.Position);
+            AdjustEntityPositions(elements, currentList.Position, newElement.Position);
         }
 
         public static void UpdateFrom(EntityBase toBase, EntityBase fromBase)
@@ -129,16 +129,16 @@ namespace TodoApi.Models
             toItem.TodoListId = fromItem.TodoListId;
         }
 
-        public static void UpdateFrom(TodoListBase toListBase, TodoListBase fromListBase)
+        public static void UpdateFrom(TodoElementBase toBase, TodoElementBase fromBase)
         {
-            UpdateFrom(toListBase as EntityBase, fromListBase as EntityBase);
+            UpdateFrom(toBase as EntityBase, fromBase as EntityBase);
 
-            toListBase.Name = fromListBase.Name;
+            toBase.Name = fromBase.Name;
         }
 
         public static void UpdateFrom(TodoList toList, TodoList fromList)
         {
-            UpdateFrom(toList as TodoListBase, fromList as TodoListBase);
+            UpdateFrom(toList as TodoElementBase, fromList as TodoElementBase);
 
             // remove obsolete child items
             List<TodoListItem> items = new List<TodoListItem>(toList.Items);

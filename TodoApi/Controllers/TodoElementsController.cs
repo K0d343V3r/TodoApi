@@ -10,23 +10,23 @@ namespace TodoApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TodoListInfosController : ControllerBase
+    public class TodoElementsController : ControllerBase
     {
         private readonly ITodoRepositoryContext _context;
 
-        public TodoListInfosController(ITodoRepositoryContext context)
+        public TodoElementsController(ITodoRepositoryContext context)
         {
             _context = context;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<TodoListInfo>>> GetAllListInfosAsync()
+        [HttpGet("lists")]
+        public async Task<ActionResult<List<TodoElement>>> GetAllListElementsAsync()
         {
-            return EntityHelper.ToListInfos(await _context.TodoLists.GetAsync(s => s.Items));
+            return EntityHelper.ToListElements(await _context.TodoLists.GetAsync(s => s.Items));
         }
 
-        [HttpGet("{id}", Name = "GetListInfo")]
-        public async Task<ActionResult<TodoListInfo>> GetListInfoAsync(int id)
+        [HttpGet("lists/{id}", Name = "GetListElement")]
+        public async Task<ActionResult<TodoElement>> GetListElementAsync(int id)
         {
             var list = await _context.TodoLists.GetAsync(id, s => s.Items);
             if (list == null)
@@ -34,13 +34,13 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            return EntityHelper.ToListInfo(list);
+            return EntityHelper.ToListElement(list);
         }
 
-        [HttpPut("{id}")]
-        [ProducesResponseType(typeof(TodoListInfo), (int)HttpStatusCode.OK)]
+        [HttpPut("lists/{id}")]
+        [ProducesResponseType(typeof(TodoElement), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> UpdateListInfoAsync(int id, [FromBody] TodoListInfo info)
+        public async Task<IActionResult> UpdateListElementAsync(int id, [FromBody] TodoElement element)
         {
             var current = await _context.TodoLists.GetAsync(id);
             if (current == null)
@@ -50,13 +50,13 @@ namespace TodoApi.Controllers
 
             // adjust list positions based on update request
             var lists = await _context.TodoLists.GetAsync();
-            EntityHelper.AdjustListInfoPositions(info, lists.ToList<EntityBase>(), current);
-            EntityHelper.UpdateFrom(current, info);
+            EntityHelper.AdjustListElementPositions(element, lists.ToList<EntityBase>(), current);
+            EntityHelper.UpdateFrom(current, element);
 
             _context.TodoLists.Update(current);
             await _context.SaveChangesAsync();
 
-            return Ok(EntityHelper.ToListInfo(current));
+            return Ok(EntityHelper.ToListElement(current));
         }
     }
 }

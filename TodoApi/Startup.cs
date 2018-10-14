@@ -41,7 +41,6 @@ namespace TodoApi
 
             // add dependency injected data services
             services.AddScoped<ITodoRepositoryContext, TodoRepositoryContext>();
-            services.AddScoped<ITodoRepositoryContext, TodoRepositoryContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

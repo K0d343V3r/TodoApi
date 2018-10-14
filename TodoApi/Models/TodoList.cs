@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TodoApi.Models
 {
-    public class TodoList : TodoListBase
+    public class TodoList : TodoElementBase
     {
         public List<TodoListItem> Items { get; set; }
 
