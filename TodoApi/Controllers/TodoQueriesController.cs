@@ -20,12 +20,15 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(List<TodoQuery>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<List<TodoQuery>>> GetAllQueriesAsync()
         {
             return await _context.TodoQueries.GetAsync();
         }
 
         [HttpGet("{id}", Name = "GetQuery")]
+        [ProducesResponseType(typeof(TodoQuery), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQuery>> GetQueryAsync(int id)
         {
             var query = await _context.TodoQueries.GetAsync(id);
@@ -39,8 +42,7 @@ namespace TodoApi.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(TodoQuery), (int)HttpStatusCode.Created)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> CreateQueryAsync([FromBody] TodoQuery query)
+        public async Task<ActionResult<TodoQuery>> CreateQueryAsync([FromBody] TodoQuery query)
         {
             // sort items based on requested position
             var items = await _context.TodoQueries.GetAsync();
@@ -54,8 +56,8 @@ namespace TodoApi.Controllers
 
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(TodoQuery), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> UpdateQueryAsync(int id, [FromBody] TodoQuery query)
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<TodoQuery>> UpdateQueryAsync(int id, [FromBody] TodoQuery query)
         {
             var current = await _context.TodoQueries.GetAsync(id);
             if (current == null)
@@ -71,11 +73,13 @@ namespace TodoApi.Controllers
             _context.TodoQueries.Update(current);
             await _context.SaveChangesAsync();
 
-            return Ok(current);
+            return current;
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteQueryAsync(int id)
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<int>> DeleteQueryAsync(int id)
         {
             var query = await _context.TodoQueries.GetAsync(id);
             if (query == null)
@@ -90,12 +94,14 @@ namespace TodoApi.Controllers
                 _context.TodoQueries.Delete(query);
                 await _context.SaveChangesAsync();
 
-                return NoContent();
+                return id;
             }
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteQueriesAsync([FromQuery(Name = "id")] List<int> ids)
+        [ProducesResponseType(typeof(List<int>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<List<int>>> DeleteQueriesAsync([FromQuery(Name = "id")] List<int> ids)
         {
             foreach (var id in ids)
             {
@@ -113,7 +119,7 @@ namespace TodoApi.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return NoContent();
+            return ids;
         }
     }
 }

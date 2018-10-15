@@ -20,6 +20,7 @@ namespace TodoApi.Controllers
         }
         
         [HttpGet]
+        [ProducesResponseType(typeof(List<TodoList>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<List<TodoList>>> GetAllListsAsync()
         {
             List<TodoList> lists = await _context.TodoLists.GetAsync(s => s.Items);
@@ -28,6 +29,8 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet("{id}", Name = "GetList")]
+        [ProducesResponseType(typeof(TodoList), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoList>> GetListAsync(int id)
         {
             var list = await FetchTodoListAsync(id);
@@ -51,8 +54,7 @@ namespace TodoApi.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(TodoList), (int)HttpStatusCode.Created)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> CreateListAsync([FromBody] TodoList list)
+        public async Task<ActionResult<TodoList>> CreateListAsync([FromBody] TodoList list)
         {
             var lists = await _context.TodoLists.GetAsync();
             EntityHelper.AdjustListPosition(list, lists.ToList<EntityBase>(), true);
@@ -65,8 +67,8 @@ namespace TodoApi.Controllers
 
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(TodoList), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> UpdateListAsync(int id, [FromBody] TodoList list)
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<TodoList>> UpdateListAsync(int id, [FromBody] TodoList list)
         {
             var current = await FetchTodoListAsync(id);
             if (current == null)
@@ -80,11 +82,13 @@ namespace TodoApi.Controllers
 
             _context.TodoLists.Update(current);
             await _context.SaveChangesAsync();
-            return Ok(current);
+            return current;
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteListAsync(int id)
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<int>> DeleteListAsync(int id)
         {
             var list = await _context.TodoLists.GetAsync(id);
             if (list == null)
@@ -99,12 +103,14 @@ namespace TodoApi.Controllers
                 _context.TodoLists.Delete(list);
                 await _context.SaveChangesAsync();
 
-                return NoContent();
+                return id;
             }
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteListsAsync([FromQuery(Name ="id")] List<int> ids)
+        [ProducesResponseType(typeof(List<int>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<List<int>>> DeleteListsAsync([FromQuery(Name ="id")] List<int> ids)
         {
             var lists = await _context.TodoLists.GetAsync();
             foreach (var id in ids)
@@ -123,7 +129,7 @@ namespace TodoApi.Controllers
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return ids;
         }
     }
 }
