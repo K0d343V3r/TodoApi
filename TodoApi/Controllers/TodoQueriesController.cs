@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -38,6 +39,95 @@ namespace TodoApi.Controllers
             }
 
             return query;
+        }
+
+        [HttpGet("{id}/results")]
+        [ProducesResponseType(typeof(List<TodoQueryResult>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<List<TodoQueryResult>>> ExecuteQueryAsync(int id)
+        {
+            var query = await _context.TodoQueries.GetAsync(id);
+            if (query == null)
+            {
+                return NotFound();
+            }
+
+            // get last set of results
+            var lastResults = await _context.TodoResults.GetAsync(r => r.TodoQueryId == id);
+
+            // re-execute query (get new list items)
+            var matchedItems = await InternalExecuteQueryAsync(query);
+
+            // re-arrange new results based on existing result positions
+            var mergedResults = await MergeResultsAsync(id, lastResults, matchedItems);
+
+            await _context.SaveChangesAsync();
+            return mergedResults;
+        }
+
+        private async Task<List<TodoQueryResult>> MergeResultsAsync(
+            int queryId, IList<TodoQueryResult> lastResults, IList<TodoListItem> matchedItems)
+        {
+            // remove stale result items
+            var mergedResults = new List<TodoQueryResult>();
+            foreach (TodoQueryResult result in lastResults)
+            {
+                var item = matchedItems.FirstOrDefault(i => i.Id == result.Item.Id);
+                if (item != null)
+                {
+                    // result still relevant, remove it from matching list
+                    matchedItems.Remove(item);
+                    mergedResults.Add(result);
+                }
+                else
+                {
+                    // result is stale, remove it from result set
+                    EntityHelper.AdjustEntityPositions(lastResults.ToList<EntityBase>(), result.Position, false);
+                    _context.TodoResults.Delete(result);
+                }
+            }
+
+            // append new ones
+            foreach (TodoListItem item in matchedItems)
+            {
+                var result = new TodoQueryResult()
+                {
+                    Item = item,
+                    Position = mergedResults.Count,
+                    TodoQueryId = queryId
+                };
+
+                mergedResults.Add(result);
+                await _context.TodoResults.AddAsync(result);
+            }
+
+            return mergedResults;
+        }
+
+        private async Task<IList<TodoListItem>> InternalExecuteQueryAsync(TodoQuery query)
+        {
+            if (query.Operand == QueryOperand.DueDate)
+            {
+                var options = new RetrievalOptions<TodoListItem>()
+                {
+                    OrderByPredicate = i => i.DueDate.Date
+                };
+                if (query.Operator == QueryOperator.Equals)
+                {
+                    options.WherePredicate = i => i.DueDate.Date == query.DateValue.Date;
+                }
+                else if (query.Operator == QueryOperator.NotEquals)
+                {
+                    options.WherePredicate = i => i.DueDate.Date != query.DateValue.Date;
+                }
+                return await _context.TodoItems.GetAsync(options);
+            }
+            else if (query.Operand == QueryOperand.Important)
+            {
+                throw new NotImplementedException();
+            }
+
+            return new List<TodoListItem>();
         }
 
         [HttpPost]
@@ -89,13 +179,24 @@ namespace TodoApi.Controllers
             else
             {
                 var queries = await _context.TodoQueries.GetAsync();
-                EntityHelper.AdjustEntityPositions(queries.ToList<EntityBase>(), query.Position, false);
-
-                _context.TodoQueries.Delete(query);
+                await DeleteQuery(query, queries);
                 await _context.SaveChangesAsync();
 
                 return id;
             }
+        }
+
+        private async Task DeleteQuery(TodoQuery query, IList<TodoQuery> queries)
+        {
+            // adjust query positions
+            EntityHelper.AdjustEntityPositions(queries.ToList<EntityBase>(), query.Position, false);
+
+            // delete query
+            _context.TodoQueries.Delete(query);
+
+            // and its last results
+            var results = await _context.TodoResults.GetAsync(r => r.TodoQueryId == query.Id);
+            results.ForEach(r => _context.TodoResults.Delete(r));
         }
 
         [HttpDelete]
@@ -103,18 +204,17 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<List<int>>> DeleteQueriesAsync([FromQuery(Name = "id")] List<int> ids)
         {
+            var queries = await _context.TodoQueries.GetAsync();
             foreach (var id in ids)
             {
-                var query = await _context.TodoQueries.GetAsync(id);
+                var query = queries.FirstOrDefault(t => t.Id == id);
                 if (query == null)
                 {
                     return NotFound();
                 }
                 else
                 {
-                    var queries = await _context.TodoQueries.GetAsync();
-                    EntityHelper.AdjustEntityPositions(queries.ToList<EntityBase>(), query.Position, false);
-                    _context.TodoQueries.Delete(query);
+                    await DeleteQuery(query, queries);
                 }
             }
 

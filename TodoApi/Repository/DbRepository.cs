@@ -28,24 +28,39 @@ namespace TodoApi.Repository
 
         public async Task<List<T>> GetAsync(params Expression<Func<T, object>>[] includePredicates)
         {
-            IQueryable<T> set = _context.Set<T>();
-            foreach (var predicate in includePredicates)
-            {
-                set = set.Include(predicate);
-            }
-
-            return await set.OrderBy(t => t.Position).ToListAsync();
+            return await GetAsync(new RetrievalOptions<T>(), includePredicates);
         }
 
         public async Task<List<T>> GetAsync(Expression<Func<T, bool>> wherePredicate, params Expression<Func<T, object>>[] includePredicates)
         {
+            var options = new RetrievalOptions<T>()
+            {
+                WherePredicate = wherePredicate
+            };
+            return await GetAsync(options, includePredicates);
+        }
+
+        public async Task<List<T>> GetAsync(RetrievalOptions<T> options, params Expression<Func<T, object>>[] includePredicates)
+        {
             IQueryable<T> set = _context.Set<T>();
+            if (options.WherePredicate != null)
+            {
+                set.Where(options.WherePredicate);
+            }
+            if (options.OrderByPredicate != null)
+            {
+                set.OrderBy(options.OrderByPredicate);
+            }
+            else
+            {
+                set.OrderBy(t => t.Position);
+            }
             foreach (var predicate in includePredicates)
             {
                 set = set.Include(predicate);
             }
 
-            return await set.Where(wherePredicate).OrderBy(t => t.Position).ToListAsync();
+            return await set.ToListAsync();
         }
 
         public async Task<T> GetAsync(int id, params Expression<Func<T, object>>[] includePredicates)

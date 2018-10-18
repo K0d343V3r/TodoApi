@@ -6,8 +6,9 @@ using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public class TodoListItemReference : EntityBase
+    public class TodoQueryResult : EntityBase
     {
-        public TodoElementBase Item { get; set; }
+        public TodoListItem Item { get; set; }
+        public int TodoQueryId { get; set; }
     }
 }

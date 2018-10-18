@@ -7,11 +7,6 @@ namespace TodoApi.Models
 {
     public class TodoList : TodoElementBase
     {
-        public List<TodoListItem> Items { get; set; }
-
-        public TodoList()
-        {
-            Items = new List<TodoListItem>();
-        }
+        public List<TodoListItem> Items { get; set; } = new List<TodoListItem>();
     }
 }

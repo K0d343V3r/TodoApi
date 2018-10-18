@@ -11,6 +11,7 @@ namespace TodoApi.Models
         public IRepository<TodoList> TodoLists { get; private set; }
         public IRepository<TodoListItem> TodoItems { get; private set; }
         public IRepository<TodoQuery> TodoQueries { get; private set; }
+        public IRepository<TodoQueryResult> TodoResults { get; private set; }
 
         public TodoRepositoryContext(TodoContext context)
             : base(context)
@@ -18,6 +19,7 @@ namespace TodoApi.Models
             TodoLists = new TodoRepository<TodoList>((TodoContext)_context);
             TodoItems = new TodoRepository<TodoListItem>((TodoContext)_context);
             TodoQueries = new TodoRepository<TodoQuery>((TodoContext)_context);
+            TodoResults = new TodoRepository<TodoQueryResult>((TodoContext)_context);
         }
     }
 }
