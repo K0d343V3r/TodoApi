@@ -8,6 +8,17 @@ namespace TodoApi.Models
 {
     internal static class EntityHelper
     {
+        public static readonly int defaultListId = 1;
+
+        public static async void CreateDefaultListAsync(ITodoRepositoryContext context)
+        {
+            if (context.TodoLists.Count() == 0)
+            {
+                await context.TodoLists.AddAsync(new TodoList() { Name = "Default" });
+                await context.SaveChangesAsync();
+            }
+        }
+
         public static TodoElement ToElement(TodoElementBase element, int childCount)
         {
             return new TodoElement()

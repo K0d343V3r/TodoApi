@@ -8,6 +8,7 @@ namespace TodoApi.Repository
 {
     public interface IRepository<T> where T : EntityBase
     {
+        int Count();
         Task<List<T>> GetAsync(params Expression<Func<T, object>>[] includePredicates);
         Task<List<T>> GetAsync(Expression<Func<T, bool>> wherePredicate, params Expression<Func<T, object>>[] includePredicates);
         Task<List<T>> GetAsync(RetrievalOptions<T> options, params Expression<Func<T, object>>[] includePredicates);

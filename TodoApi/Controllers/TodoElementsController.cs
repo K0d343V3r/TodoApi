@@ -17,13 +17,15 @@ namespace TodoApi.Controllers
         public TodoElementsController(ITodoRepositoryContext context)
         {
             _context = context;
+
+            Task.Run(() => EntityHelper.CreateDefaultListAsync(context)).Wait();
         }
 
         [HttpGet("lists")]
         [ProducesResponseType(typeof(List<TodoElement>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<List<TodoElement>>> GetAllListElementsAsync()
         {
-            var lists = await _context.TodoLists.GetAsync(s => s.Items);
+            var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId, l => l.Items);
             return lists.Select(list => EntityHelper.ToElement(list, list.Items.Count)).ToList();
         }
 
@@ -78,11 +80,14 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            // adjust list positions based on update request
-            var lists = await _context.TodoLists.GetAsync();
-            EntityHelper.AdjustEntityPositions(element, lists.ToList<EntityBase>(), current);
-            EntityHelper.UpdateFrom(current, element);
+            if (id != EntityHelper.defaultListId)
+            {
+                // if default list is being updated, no need to adjust other lists positions
+                var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
+                EntityHelper.AdjustEntityPositions(element, lists.ToList<EntityBase>(), current);
+            }
 
+            EntityHelper.UpdateFrom(current, element);
             _context.TodoLists.Update(current);
             await _context.SaveChangesAsync();
 

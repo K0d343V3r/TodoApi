@@ -16,6 +16,11 @@ namespace TodoApi.Repository
             _context = context;
         }
 
+        public int Count()
+        {
+            return _context.Set<T>().Count();
+        }
+
         public async Task AddAsync(T entity)
         {
             await _context.Set<T>().AddAsync(entity);
@@ -43,24 +48,19 @@ namespace TodoApi.Repository
         public async Task<List<T>> GetAsync(RetrievalOptions<T> options, params Expression<Func<T, object>>[] includePredicates)
         {
             IQueryable<T> set = _context.Set<T>();
-            if (options.WherePredicate != null)
-            {
-                set.Where(options.WherePredicate);
-            }
-            if (options.OrderByPredicate != null)
-            {
-                set.OrderBy(options.OrderByPredicate);
-            }
-            else
-            {
-                set.OrderBy(t => t.Position);
-            }
             foreach (var predicate in includePredicates)
             {
                 set = set.Include(predicate);
             }
 
-            return await set.ToListAsync();
+            if (options.WherePredicate != null)
+            {
+                return await set.Where(options.WherePredicate).OrderBy(options.OrderByPredicate ?? (t => t.Position)).ToListAsync();
+            }
+            else
+            {
+                return await set.OrderBy(options.OrderByPredicate ?? (t => t.Position)).ToListAsync();
+            }
         }
 
         public async Task<T> GetAsync(int id, params Expression<Func<T, object>>[] includePredicates)

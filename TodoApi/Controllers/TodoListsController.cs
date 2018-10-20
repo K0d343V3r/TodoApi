@@ -17,14 +17,17 @@ namespace TodoApi.Controllers
         public TodoListsController(ITodoRepositoryContext context)
         {
             _context = context;
+
+            Task.Run(() => EntityHelper.CreateDefaultListAsync(context)).Wait();
         }
-        
+
         [HttpGet]
         [ProducesResponseType(typeof(List<TodoList>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<List<TodoList>>> GetAllListsAsync()
         {
-            List<TodoList> lists = await _context.TodoLists.GetAsync(s => s.Items);
-            lists.ForEach(m => m.Items = m.Items.OrderBy(o => o.Position).ToList());
+            List<TodoList> lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId, l => l.Items);
+            lists.ForEach(l => l.Items = l.Items.OrderBy(i => i.Position).ToList());
+
             return lists;
         }
 
@@ -49,6 +52,7 @@ namespace TodoApi.Controllers
             {
                 list.Items = list.Items.OrderBy(o => o.Position).ToList();
             }
+
             return list;
         }
 
@@ -56,7 +60,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType(typeof(TodoList), (int)HttpStatusCode.Created)]
         public async Task<ActionResult<TodoList>> CreateListAsync([FromBody] TodoList list)
         {
-            var lists = await _context.TodoLists.GetAsync();
+            var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
             EntityHelper.AdjustListPosition(list, lists.ToList<EntityBase>(), true);
 
             await _context.TodoLists.AddAsync(list);
@@ -76,54 +80,76 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            var lists = await _context.TodoLists.GetAsync();
-            EntityHelper.AdjustListPositions(list, lists.ToList<EntityBase>(), current);
-            EntityHelper.UpdateFrom(current, list);
+            if (id != EntityHelper.defaultListId)
+            {
+                // if default list being updated, no need to mess with list ordering
+                var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
+                EntityHelper.AdjustListPositions(list, lists.ToList<EntityBase>(), current);
+            }
 
+            EntityHelper.UpdateFrom(current, list);
             _context.TodoLists.Update(current);
             await _context.SaveChangesAsync();
+
             return current;
         }
 
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<int>> DeleteListAsync(int id)
         {
-            var list = await _context.TodoLists.GetAsync(id);
-            if (list == null)
+            if (id == EntityHelper.defaultListId)
             {
-                return NotFound();
+                // we do not delete the default list
+                return BadRequest("Cannot delete default list");
             }
             else
             {
-                var lists = await _context.TodoLists.GetAsync();
-                EntityHelper.AdjustEntityPositions(lists.ToList<EntityBase>(), list.Position, false);
-
-                _context.TodoLists.Delete(list);
-                await _context.SaveChangesAsync();
-
-                return id;
-            }
-        }
-
-        [HttpDelete]
-        [ProducesResponseType(typeof(List<int>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<List<int>>> DeleteListsAsync([FromQuery(Name ="id")] List<int> ids)
-        {
-            var lists = await _context.TodoLists.GetAsync();
-            foreach (var id in ids)
-            {
-                var list = lists.FirstOrDefault(t => t.Id == id);
+                var list = await _context.TodoLists.GetAsync(id);
                 if (list == null)
                 {
                     return NotFound();
                 }
                 else
                 {
+                    var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
                     EntityHelper.AdjustEntityPositions(lists.ToList<EntityBase>(), list.Position, false);
+
                     _context.TodoLists.Delete(list);
+                    await _context.SaveChangesAsync();
+
+                    return id;
+                }
+            }
+        }
+
+        [HttpDelete]
+        [ProducesResponseType(typeof(List<int>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<List<int>>> DeleteListsAsync([FromQuery(Name ="id")] List<int> ids)
+        {
+            var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
+            foreach (var id in ids)
+            {
+                if (id == EntityHelper.defaultListId)
+                {
+                    return BadRequest("Cannot delete default list.");
+                }
+                else
+                {
+                    var list = lists.FirstOrDefault(t => t.Id == id);
+                    if (list == null)
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        EntityHelper.AdjustEntityPositions(lists.ToList<EntityBase>(), list.Position, false);
+                        _context.TodoLists.Delete(list);
+                    }
                 }
             }
 
