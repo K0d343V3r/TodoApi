@@ -16,6 +16,6 @@ namespace TodoApi.Models
         public DbSet<TodoList> TodoLists { get; set; }
         public DbSet<TodoListItem> TodoItems { get; set; }
         public DbSet<TodoQuery> TodoQueries { get; set; }
-        public DbSet<TodoQueryResult> TodoResults { get; set; }
+        public DbSet<TodoItemReference> TodoReferences { get; set; }
     }
 }

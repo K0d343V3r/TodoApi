@@ -129,6 +129,16 @@ namespace TodoApi.Models
             toItem.TodoListId = fromItem.TodoListId;
         }
 
+        public static void UpdateFrom(TodoQuery toQuery, TodoQuery fromQuery)
+        {
+            UpdateFrom(toQuery as TodoElementBase, fromQuery as TodoElementBase);
+
+            toQuery.BoolValue = fromQuery.BoolValue;
+            toQuery.DateValue = fromQuery.DateValue;
+            toQuery.Operand = fromQuery.Operand;
+            toQuery.Operator = fromQuery.Operator;
+        }
+
         public static void UpdateFrom(TodoElementBase toBase, TodoElementBase fromBase)
         {
             UpdateFrom(toBase as EntityBase, fromBase as EntityBase);

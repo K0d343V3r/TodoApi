@@ -88,14 +88,28 @@ namespace TodoApi.Controllers
             }
             else
             {
-                var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-                EntityHelper.AdjustEntityPositions(items.ToList<EntityBase>(), item.Position, false);
-
-                _context.TodoItems.Delete(item);
+                await DeleteItem(item);
                 await _context.SaveChangesAsync();
 
                 return id;
             }
+        }
+
+        private async Task DeleteItem(TodoListItem item)
+        {
+            var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
+            EntityHelper.AdjustEntityPositions(items.ToList<EntityBase>(), item.Position, false);
+
+            var references = await _context.TodoReferences.GetAsync(r => r.Item.Id == item.Id);
+            foreach (var reference in references)
+            {
+                var group = await _context.TodoReferences.GetAsync(r => r.TodoQueryId == reference.TodoQueryId);
+                EntityHelper.AdjustEntityPositions(references.ToList<EntityBase>(), reference.Position, false);
+
+                _context.TodoReferences.Delete(reference);
+            }
+
+            _context.TodoItems.Delete(item);
         }
 
         [HttpDelete]
@@ -112,9 +126,7 @@ namespace TodoApi.Controllers
                 }
                 else
                 {
-                    var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-                    EntityHelper.AdjustEntityPositions(items.ToList<EntityBase>(), item.Position, false);
-                    _context.TodoItems.Delete(item);
+                    await DeleteItem(item);
                 }
             }
 

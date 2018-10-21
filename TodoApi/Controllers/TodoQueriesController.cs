@@ -42,9 +42,9 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet("{id}/results")]
-        [ProducesResponseType(typeof(List<TodoQueryResult>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(TodoQueryResults), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<List<TodoQueryResult>>> ExecuteQueryAsync(int id)
+        public async Task<ActionResult<TodoQueryResults>> ExecuteQueryAsync(int id)
         {
             var query = await _context.TodoQueries.GetAsync(id);
             if (query == null)
@@ -53,7 +53,7 @@ namespace TodoApi.Controllers
             }
 
             // get last set of results
-            var lastResults = await _context.TodoResults.GetAsync(r => r.TodoQueryId == id);
+            var lastResults = await _context.TodoReferences.GetAsync(r => r.TodoQueryId == id, r => r.Item);
 
             // re-execute query (get new list items)
             var matchedItems = await InternalExecuteQueryAsync(query);
@@ -62,15 +62,16 @@ namespace TodoApi.Controllers
             var mergedResults = await MergeResultsAsync(id, lastResults, matchedItems);
 
             await _context.SaveChangesAsync();
-            return mergedResults;
+
+            return new TodoQueryResults() { TodoQueryId = id, References = mergedResults };
         }
 
-        private async Task<List<TodoQueryResult>> MergeResultsAsync(
-            int queryId, IList<TodoQueryResult> lastResults, IList<TodoListItem> matchedItems)
+        private async Task<List<TodoItemReference>> MergeResultsAsync(
+            int queryId, IList<TodoItemReference> lastResults, IList<TodoListItem> matchedItems)
         {
             // remove stale result items
-            var mergedResults = new List<TodoQueryResult>();
-            foreach (TodoQueryResult result in lastResults)
+            var mergedResults = new List<TodoItemReference>();
+            foreach (TodoItemReference result in lastResults)
             {
                 var item = matchedItems.FirstOrDefault(i => i.Id == result.Item.Id);
                 if (item != null)
@@ -83,14 +84,14 @@ namespace TodoApi.Controllers
                 {
                     // result is stale, remove it from result set
                     EntityHelper.AdjustEntityPositions(lastResults.ToList<EntityBase>(), result.Position, false);
-                    _context.TodoResults.Delete(result);
+                    _context.TodoReferences.Delete(result);
                 }
             }
 
             // append new ones
             foreach (TodoListItem item in matchedItems)
             {
-                var result = new TodoQueryResult()
+                var result = new TodoItemReference()
                 {
                     Item = item,
                     Position = mergedResults.Count,
@@ -98,7 +99,7 @@ namespace TodoApi.Controllers
                 };
 
                 mergedResults.Add(result);
-                await _context.TodoResults.AddAsync(result);
+                await _context.TodoReferences.AddAsync(result);
             }
 
             return mergedResults;
@@ -191,12 +192,12 @@ namespace TodoApi.Controllers
             // adjust query positions
             EntityHelper.AdjustEntityPositions(queries.ToList<EntityBase>(), query.Position, false);
 
-            // delete query
-            _context.TodoQueries.Delete(query);
+            // delete last results
+            var results = await _context.TodoReferences.GetAsync(r => r.TodoQueryId == query.Id);
+            results.ForEach(r => _context.TodoReferences.Delete(r));
 
-            // and its last results
-            var results = await _context.TodoResults.GetAsync(r => r.TodoQueryId == query.Id);
-            results.ForEach(r => _context.TodoResults.Delete(r));
+            // and query
+            _context.TodoQueries.Delete(query);
         }
 
         [HttpDelete]
