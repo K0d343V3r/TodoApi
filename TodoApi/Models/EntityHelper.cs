@@ -49,12 +49,9 @@ namespace TodoApi.Models
 
         private static void AdjustEntityPosition(EntityBase entity, int count)
         {
-            if (entity.Position < 0)
+            if (entity.Position < 0 || entity.Position > count)
             {
-                entity.Position = 0;
-            }
-            if (entity.Position > count)
-            {
+                // given index outside list scope, assume append
                 entity.Position = count;
             }
         }
