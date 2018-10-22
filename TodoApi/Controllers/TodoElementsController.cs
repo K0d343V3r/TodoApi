@@ -60,9 +60,9 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet("queries/{id}", Name = "GetQueryElement")]
-        [ProducesResponseType(typeof(TodoElement), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(TodoQueryElement), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<TodoElement>> GetQueryElementAsync(int id)
+        public async Task<ActionResult<TodoQueryElement>> GetQueryElementAsync(int id)
         {
             var query = await _context.TodoQueries.GetAsync(id);
             if (query == null)
@@ -70,9 +70,8 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            // TODO: get childCount once query results are persisted
-            var childCount = 0;
-            return EntityHelper.ToElement(query, childCount);
+            var references = await _context.TodoReferences.GetAsync(r => r.TodoQueryId == id);
+            return EntityHelper.ToElement(query, references.Count);
         }
 
         [HttpPut("lists/{id}")]
