@@ -19,15 +19,28 @@ namespace TodoApi.Models
             }
         }
 
-        public static TodoElement ToElement(TodoElementBase element, int childCount)
+        public static TodoElement ToElement(TodoList list)
         {
-            return new TodoElement()
-            {
-                Id = element.Id,
-                Name = element.Name,
-                Position = element.Position,
-                ChildCount = childCount
-            };
+            var element = new TodoElement();
+            InitializeElement(element, list);
+            element.ChildCount = list.Items.Count;
+            return element;
+        }
+
+        private static void InitializeElement(TodoElement element, TodoElementBase elementBase)
+        {
+            element.Id = elementBase.Id;
+            element.Name = elementBase.Name;
+            element.Position = elementBase.Position;
+        }
+
+        public static TodoQueryElement ToElement(TodoQuery query, int childCount)
+        {
+            var element = new TodoQueryElement();
+            InitializeElement(element, query);
+            element.Query = query;
+            element.ChildCount = childCount;
+            return element;
         }
 
         public static void AdjustListPosition(TodoList list, IList<EntityBase> lists, bool add)
