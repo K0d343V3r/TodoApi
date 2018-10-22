@@ -123,6 +123,7 @@ namespace TodoApi.Models
             toItem.Task = fromItem.Task;
             toItem.Done = fromItem.Done;
             toItem.DueDate = fromItem.DueDate;
+            toItem.Important = fromItem.Important;
             toItem.TodoListId = fromItem.TodoListId;
         }
 

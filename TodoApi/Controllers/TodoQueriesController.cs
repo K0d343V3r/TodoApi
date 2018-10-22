@@ -107,28 +107,35 @@ namespace TodoApi.Controllers
 
         private async Task<IList<TodoListItem>> InternalExecuteQueryAsync(TodoQuery query)
         {
+            var options = new RetrievalOptions<TodoListItem>();
             if (query.Operand == QueryOperand.DueDate)
             {
-                var options = new RetrievalOptions<TodoListItem>()
-                {
-                    OrderByPredicate = i => i.DueDate.Date
-                };
                 if (query.Operator == QueryOperator.Equals)
                 {
                     options.WherePredicate = i => i.DueDate.Date == query.DateValue.Date;
                 }
                 else if (query.Operator == QueryOperator.NotEquals)
                 {
+                    options.OrderByPredicate = i => i.DueDate.Date;
                     options.WherePredicate = i => i.DueDate.Date != query.DateValue.Date;
                 }
                 return await _context.TodoItems.GetAsync(options);
             }
             else if (query.Operand == QueryOperand.Important)
             {
-                throw new NotImplementedException();
+                if (query.Operator == QueryOperator.Equals)
+                {
+                    options.WherePredicate = i => i.Important == query.BoolValue;
+                }
+                else if (query.Operator == QueryOperator.NotEquals)
+                {
+                    options.OrderByPredicate = i => i.Important;
+                    options.WherePredicate = i => i.Important != query.BoolValue;
+                }
             }
 
-            return new List<TodoListItem>();
+            return options.WherePredicate != null ? 
+                await _context.TodoItems.GetAsync(options) : new List<TodoListItem>();
         }
 
         [HttpPost]
