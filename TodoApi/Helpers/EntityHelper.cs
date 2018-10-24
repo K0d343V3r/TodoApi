@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TodoApi.Models;
 using TodoApi.Repository;
 
-namespace TodoApi.Models
+namespace TodoApi.Helpers
 {
     internal static class EntityHelper
     {
@@ -23,7 +24,7 @@ namespace TodoApi.Models
         {
             var element = new TodoElement();
             InitializeElement(element, list);
-            element.ChildCount = list.Items.Count;
+            element.RemainingCount = list.Items.Count(i => !i.Done);
             return element;
         }
 
@@ -34,12 +35,12 @@ namespace TodoApi.Models
             element.Position = elementBase.Position;
         }
 
-        public static TodoQueryElement ToElement(TodoQuery query, int childCount)
+        public static TodoQueryElement ToElement(TodoQuery query, int remainingCount)
         {
             var element = new TodoQueryElement();
             InitializeElement(element, query);
             element.Query = query;
-            element.ChildCount = childCount;
+            element.RemainingCount = remainingCount;
             return element;
         }
 

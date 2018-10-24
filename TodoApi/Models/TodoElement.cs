@@ -8,6 +8,6 @@ namespace TodoApi.Models
 {
     public class TodoElement : TodoElementBase
     {
-        public int ChildCount { get; internal set; }
+        public int RemainingCount { get; internal set; }
     }
 }
