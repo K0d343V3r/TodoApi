@@ -78,12 +78,23 @@ namespace TodoApi.Helpers
             {
                 if (query.Operator == QueryOperator.Equals)
                 {
-                    options.WherePredicate = i => i.DueDate.Date == query.DateValue.Date;
+                    options.Where = i => i.DueDate.Date == query.DateValue.Date;
                 }
                 else if (query.Operator == QueryOperator.NotEquals)
                 {
-                    options.OrderByPredicate = i => i.DueDate.Date;
-                    options.WherePredicate = i => i.DueDate.Date != query.DateValue.Date;
+                    options.OrderBy.Predicate = i => i.DueDate.Date;
+                    options.Where = i => i.DueDate.Date != query.DateValue.Date;
+                }
+                else if (query.Operator == QueryOperator.GreaterThan)
+                {
+                    options.OrderBy.Predicate = i => i.DueDate.Date;
+                    options.Where = i => i.DueDate.Date > query.DateValue.Date;
+                }
+                else if (query.Operator == QueryOperator.LessThan)
+                {
+                    options.OrderBy.Ascending = false;
+                    options.OrderBy.Predicate = i => i.DueDate.Date;
+                    options.Where = i => i.DueDate.Date < query.DateValue.Date;
                 }
                 return await _context.TodoItems.GetAsync(options);
             }
@@ -91,16 +102,16 @@ namespace TodoApi.Helpers
             {
                 if (query.Operator == QueryOperator.Equals)
                 {
-                    options.WherePredicate = i => i.Important == query.BoolValue;
+                    options.Where = i => i.Important == query.BoolValue;
                 }
                 else if (query.Operator == QueryOperator.NotEquals)
                 {
-                    options.OrderByPredicate = i => i.Important;
-                    options.WherePredicate = i => i.Important != query.BoolValue;
+                    options.OrderBy.Predicate = i => i.Important;
+                    options.Where = i => i.Important != query.BoolValue;
                 }
             }
 
-            return options.WherePredicate != null ? 
+            return options.Where != null ? 
                 await _context.TodoItems.GetAsync(options) : new List<TodoListItem>();
         }
 

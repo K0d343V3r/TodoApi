@@ -8,6 +8,8 @@ namespace TodoApi.Models
     public enum QueryOperator
     {
         Equals,
-        NotEquals
+        NotEquals,
+        GreaterThan,
+        LessThan
     }
 }

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace TodoApi.Repository
 {
-    public class RetrievalOptions<T>
+    public class OrderByOptions<T>
     {
-        public OrderByOptions<T> OrderBy = new OrderByOptions<T>();
-        public Expression<Func<T, bool>> Where { get; set; }
+        public bool Ascending { get; set; } = true;
+        public Expression<Func<T, object>> Predicate { get; set; }
     }
 }

@@ -40,7 +40,7 @@ namespace TodoApi.Repository
         {
             var options = new RetrievalOptions<T>()
             {
-                WherePredicate = wherePredicate
+                Where = wherePredicate
             };
             return await GetAsync(options, includePredicates);
         }
@@ -53,13 +53,25 @@ namespace TodoApi.Repository
                 set = set.Include(predicate);
             }
 
-            if (options.WherePredicate != null)
+            // NOTE: Unlike includes, it looks like Where and OrderBy need to be executed within the same statement.
+            if (options.Where != null)
             {
-                return await set.Where(options.WherePredicate).OrderBy(options.OrderByPredicate ?? (t => t.Position)).ToListAsync();
+                if (options.OrderBy.Ascending)
+                {
+                    return await set.Where(options.Where).OrderBy(options.OrderBy.Predicate ?? (t => t.Position)).ToListAsync();
+                }
+                else
+                {
+                    return await set.Where(options.Where).OrderByDescending(options.OrderBy.Predicate ?? (t => t.Position)).ToListAsync();
+                }
+            }
+            else if (options.OrderBy.Ascending)
+            {
+                return await set.OrderBy(options.OrderBy.Predicate ?? (t => t.Position)).ToListAsync();
             }
             else
             {
-                return await set.OrderBy(options.OrderByPredicate ?? (t => t.Position)).ToListAsync();
+                return await set.OrderByDescending(options.OrderBy.Predicate ?? (t => t.Position)).ToListAsync();
             }
         }
 
