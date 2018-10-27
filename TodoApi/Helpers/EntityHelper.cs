@@ -146,7 +146,8 @@ namespace TodoApi.Helpers
             UpdateFrom(toQuery as TodoElementBase, fromQuery as TodoElementBase);
 
             toQuery.BoolValue = fromQuery.BoolValue;
-            toQuery.DateValue = fromQuery.DateValue;
+            toQuery.AbsoluteDateValue = fromQuery.AbsoluteDateValue;
+            toQuery.RelativeDateValue = fromQuery.RelativeDateValue;
             toQuery.Operand = fromQuery.Operand;
             toQuery.Operator = fromQuery.Operator;
         }

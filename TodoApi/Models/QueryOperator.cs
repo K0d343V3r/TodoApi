@@ -10,6 +10,8 @@ namespace TodoApi.Models
         Equals,
         NotEquals,
         GreaterThan,
-        LessThan
+        GreaterThanOrEquals,
+        LessThan,
+        LessThanOrEquals
     }
 }

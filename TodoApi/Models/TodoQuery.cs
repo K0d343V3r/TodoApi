@@ -10,6 +10,7 @@ namespace TodoApi.Models
         public QueryOperand Operand { get; set; }
         public QueryOperator Operator { get; set; }
         public bool BoolValue { get; set; }
-        public DateTime DateValue { get; set; }
+        public DateTime AbsoluteDateValue { get; set; }
+        public int RelativeDateValue { get; set; }
     }
 }
