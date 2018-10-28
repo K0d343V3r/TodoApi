@@ -76,34 +76,40 @@ namespace TodoApi.Helpers
             var options = new RetrievalOptions<TodoListItem>();
             if (query.Operand == QueryOperand.DueDate)
             {
-                DateTime targetDay = ResolveTargetDate(query);
-                options.OrderBy.Predicate = i => i.DueDate.Date;
+                DateTime? targetDay = ResolveTargetDate(query);
                 if (query.Operator == QueryOperator.Equals)
                 {
                     options.OrderBy.Predicate = i => i.Important;
-                    options.Where = i => i.DueDate.Date == targetDay;
+                    options.Where = i => (!targetDay.HasValue && !i.DueDate.HasValue) || 
+                        (targetDay.HasValue && i.DueDate.HasValue && i.DueDate.Value.Date == targetDay);
                 }
                 else if (query.Operator == QueryOperator.NotEquals)
                 {
-                    options.Where = i => i.DueDate.Date != targetDay;
+                    options.OrderBy.Predicate = i => i.DueDate ?? DateTime.MaxValue;
+                    options.Where = i => (!targetDay.HasValue && i.DueDate.HasValue) ||
+                        (targetDay.HasValue && i.DueDate.HasValue && i.DueDate.Value.Date != targetDay);
                 }
                 else if (query.Operator == QueryOperator.GreaterThan)
                 {
-                    options.Where = i => i.DueDate.Date > targetDay;
+                    options.OrderBy.Predicate = i => i.DueDate ?? DateTime.MaxValue;
+                    options.Where = i => targetDay.HasValue && i.DueDate.HasValue && i.DueDate.Value.Date > targetDay;
                 }
                 else if (query.Operator == QueryOperator.GreaterThanOrEquals)
                 {
-                    options.Where = i => i.DueDate.Date >= targetDay;
+                    options.OrderBy.Predicate = i => i.DueDate ?? DateTime.MaxValue;
+                    options.Where = i => targetDay.HasValue && i.DueDate.HasValue && i.DueDate.Value.Date >= targetDay;
                 }
                 else if (query.Operator == QueryOperator.LessThan)
                 {
                     options.OrderBy.Ascending = false;
-                    options.Where = i => i.DueDate != default(DateTime) && i.DueDate.Date < targetDay;
+                    options.OrderBy.Predicate = i => i.DueDate ?? DateTime.MinValue;
+                    options.Where = i => targetDay.HasValue && i.DueDate.HasValue && i.DueDate.Value.Date < targetDay;
                 }
                 else if (query.Operator == QueryOperator.LessThanOrEquals)
                 {
                     options.OrderBy.Ascending = false;
-                    options.Where = i => i.DueDate != default(DateTime) && i.DueDate.Date <= targetDay;
+                    options.OrderBy.Predicate = i => i.DueDate ?? DateTime.MinValue;
+                    options.Where = i => targetDay.HasValue && i.DueDate.HasValue && i.DueDate.Value.Date <= targetDay;
                 }
                 return await _context.TodoItems.GetAsync(options);
             }
@@ -124,17 +130,17 @@ namespace TodoApi.Helpers
                 await _context.TodoItems.GetAsync(options) : new List<TodoListItem>();
         }
 
-        private DateTime ResolveTargetDate(TodoQuery query)
+        private DateTime? ResolveTargetDate(TodoQuery query)
         {
-            if (query.AbsoluteDateValue != default(DateTime))
+            if (!query.RelativeDateValue.HasValue)
             {
-                return query.AbsoluteDateValue.Date;
+                return !query.AbsoluteDateValue.HasValue ? (DateTime?)null : query.AbsoluteDateValue.Value.Date;
             }
             else
             {
                 DateTime date = DateTime.UtcNow;
                 // offset day by requested value
-                date = new DateTime(date.Year, date.Month, date.Day + query.RelativeDateValue);
+                date = new DateTime(date.Year, date.Month, date.Day + query.RelativeDateValue.Value);
                 DateTime.SpecifyKind(date, DateTimeKind.Utc);
                 return date.Date;
             }
