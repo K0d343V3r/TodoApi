@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TodoApi.Models
 {
-    public class TodoQueryElement : TodoElement
+    public class TodoQueryElement : TodoBrowsingElement
     {
         public TodoQuery Query { get; set; }
     }

@@ -16,10 +16,10 @@ namespace TodoApi.Models
         public TodoRepositoryContext(TodoContext context)
             : base(context)
         {
-            TodoLists = new TodoRepository<TodoList>((TodoContext)_context);
-            TodoItems = new TodoRepository<TodoListItem>((TodoContext)_context);
+            TodoLists = new TodoSortingRepository<TodoList>((TodoContext)_context);
+            TodoItems = new TodoSortingRepository<TodoListItem>((TodoContext)_context);
             TodoQueries = new TodoRepository<TodoQuery>((TodoContext)_context);
-            TodoReferences = new TodoRepository<TodoItemReference>((TodoContext)_context);
+            TodoReferences = new TodoSortingRepository<TodoItemReference>((TodoContext)_context);
         }
     }
 }

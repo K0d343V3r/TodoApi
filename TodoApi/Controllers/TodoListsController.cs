@@ -62,7 +62,7 @@ namespace TodoApi.Controllers
         public async Task<ActionResult<TodoList>> CreateListAsync([FromBody] TodoList list)
         {
             var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
-            EntityHelper.AdjustListPosition(list, lists.ToList<EntityBase>(), true);
+            EntityHelper.AdjustListPosition(list, lists.ToList<ISortable>(), true);
 
             await _context.TodoLists.AddAsync(list);
             await _context.SaveChangesAsync();
@@ -85,7 +85,7 @@ namespace TodoApi.Controllers
             {
                 // if default list being updated, no need to mess with list ordering
                 var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
-                EntityHelper.AdjustListPositions(list, lists.ToList<EntityBase>(), current);
+                EntityHelper.AdjustListPositions(list, lists.ToList<ISortable>(), current);
             }
 
             EntityHelper.UpdateFrom(current, list);
@@ -116,7 +116,7 @@ namespace TodoApi.Controllers
                 else
                 {
                     var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
-                    EntityHelper.AdjustEntityPositions(lists.ToList<EntityBase>(), list.Position, false);
+                    EntityHelper.AdjustEntityPositions(lists.ToList<ISortable>(), list.Position, false);
 
                     _context.TodoLists.Delete(list);
                     await _context.SaveChangesAsync();
@@ -148,7 +148,7 @@ namespace TodoApi.Controllers
                     }
                     else
                     {
-                        EntityHelper.AdjustEntityPositions(lists.ToList<EntityBase>(), list.Position, false);
+                        EntityHelper.AdjustEntityPositions(lists.ToList<ISortable>(), list.Position, false);
                         _context.TodoLists.Delete(list);
                     }
                 }

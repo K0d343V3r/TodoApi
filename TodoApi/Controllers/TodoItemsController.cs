@@ -47,7 +47,7 @@ namespace TodoApi.Controllers
         {
             // sort items based on requested position
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-            EntityHelper.AdjustEntityPosition(item, items.ToList<EntityBase>(), true);
+            EntityHelper.AdjustEntityPosition(item, items.ToList<ISortable>(), true);
 
             await _context.TodoItems.AddAsync(item);
             await _context.SaveChangesAsync();
@@ -68,7 +68,7 @@ namespace TodoApi.Controllers
 
             // update item positions for todo list
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-            EntityHelper.AdjustEntityPositions(item, items.ToList<EntityBase>(), current);
+            EntityHelper.AdjustEntityPositions(item, items.ToList<ISortable>(), current);
             EntityHelper.UpdateFrom(current, item);
 
             _context.TodoItems.Update(current);
@@ -99,13 +99,13 @@ namespace TodoApi.Controllers
         private async Task DeleteItem(TodoListItem item)
         {
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-            EntityHelper.AdjustEntityPositions(items.ToList<EntityBase>(), item.Position, false);
+            EntityHelper.AdjustEntityPositions(items.ToList<ISortable>(), item.Position, false);
 
             var references = await _context.TodoReferences.GetAsync(r => r.Item.Id == item.Id);
             foreach (var reference in references)
             {
                 var group = await _context.TodoReferences.GetAsync(r => r.TodoQueryId == reference.TodoQueryId);
-                EntityHelper.AdjustEntityPositions(references.ToList<EntityBase>(), reference.Position, false);
+                EntityHelper.AdjustEntityPositions(references.ToList<ISortable>(), reference.Position, false);
 
                 _context.TodoReferences.Delete(reference);
             }

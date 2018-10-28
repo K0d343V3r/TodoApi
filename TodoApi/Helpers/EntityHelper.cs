@@ -28,11 +28,16 @@ namespace TodoApi.Helpers
             return element;
         }
 
-        private static void InitializeElement(TodoElement element, TodoElementBase elementBase)
+        private static void InitializeElement(TodoElementBase toElement, TodoElementBase fromElement)
         {
-            element.Id = elementBase.Id;
-            element.Name = elementBase.Name;
-            element.Position = elementBase.Position;
+            toElement.Id = fromElement.Id;
+            toElement.Name = fromElement.Name;
+            ISortable fromSortable = fromElement as ISortable;
+            ISortable toSortable = toElement as ISortable;
+            if (fromSortable != null && toSortable != null)
+            {
+                toSortable.Position = fromSortable.Position;
+            }
         }
 
         public static TodoQueryElement ToElement(TodoQuery query, int remainingCount)
@@ -44,7 +49,7 @@ namespace TodoApi.Helpers
             return element;
         }
 
-        public static void AdjustListPosition(TodoList list, IList<EntityBase> lists, bool add)
+        public static void AdjustListPosition(TodoList list, IList<ISortable> lists, bool add)
         {
             AdjustListPositionInternal(list, lists.Count);
 
@@ -61,7 +66,7 @@ namespace TodoApi.Helpers
             }
         }
 
-        private static void AdjustEntityPosition(EntityBase entity, int count)
+        private static void AdjustEntityPosition(ISortable entity, int count)
         {
             if (entity.Position < 0 || entity.Position > count)
             {
@@ -70,14 +75,14 @@ namespace TodoApi.Helpers
             }
         }
 
-        public static void AdjustEntityPosition(EntityBase entity, IList<EntityBase> entities, bool add)
+        public static void AdjustEntityPosition(ISortable entity, IList<ISortable> entities, bool add)
         {
             AdjustEntityPosition(entity, entities.Count);
 
             AdjustEntityPositions(entities, entity.Position, add);
         }
 
-        public static void AdjustEntityPositions(IList<EntityBase> entities, int position, bool add)
+        public static void AdjustEntityPositions(IList<ISortable> entities, int position, bool add)
         {
             for (int i = add ? position : position + 1; i < entities.Count; i++)
             {
@@ -85,14 +90,14 @@ namespace TodoApi.Helpers
             }
         }
 
-        public static void AdjustListPositions(TodoList newList, IList<EntityBase> lists, TodoList currentList)
+        public static void AdjustListPositions(TodoList newList, IList<ISortable> lists, TodoList currentList)
         {
             AdjustListPositionInternal(newList, lists.Count);
 
             AdjustEntityPositions(lists, currentList.Position, newList.Position);
         }
 
-        private static void AdjustEntityPositions(IList<EntityBase> list, int oldPosition, int newPosition)
+        private static void AdjustEntityPositions(IList<ISortable> list, int oldPosition, int newPosition)
         {
             if (newPosition != oldPosition)
             {
@@ -117,7 +122,7 @@ namespace TodoApi.Helpers
         }
 
         public static void AdjustEntityPositions(
-            EntityBase newEntity, IList<EntityBase> entities, EntityBase currentEntity)
+            ISortable newEntity, IList<ISortable> entities, ISortable currentEntity)
         {
             AdjustEntityPosition(newEntity, entities.Count);
 
@@ -127,7 +132,12 @@ namespace TodoApi.Helpers
         public static void UpdateFrom(EntityBase toBase, EntityBase fromBase)
         {
             toBase.Id = fromBase.Id;
-            toBase.Position = fromBase.Position;
+            var toSortable = toBase as ISortable;
+            var fromSortable = fromBase as ISortable;
+            if (toSortable != null && fromSortable != null)
+            {
+                toSortable.Position = fromSortable.Position;
+            }
         }
 
         public static void UpdateFrom(TodoListItem toItem, TodoListItem fromItem)

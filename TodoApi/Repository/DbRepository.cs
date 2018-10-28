@@ -56,22 +56,33 @@ namespace TodoApi.Repository
             // NOTE: Unlike includes, it looks like Where and OrderBy need to be executed within the same statement.
             if (options.Where != null)
             {
-                if (options.OrderBy.Ascending)
+                if (options.OrderBy.Predicate == null)
                 {
-                    return await set.Where(options.Where).OrderBy(options.OrderBy.Predicate ?? (t => t.Position)).ToListAsync();
+                    return await set.Where(options.Where).ToListAsync();
+                }
+                else if (options.OrderBy.Ascending)
+                {
+                    return await set.Where(options.Where).OrderBy(options.OrderBy.Predicate).ToListAsync();
                 }
                 else
                 {
-                    return await set.Where(options.Where).OrderByDescending(options.OrderBy.Predicate ?? (t => t.Position)).ToListAsync();
+                    return await set.Where(options.Where).OrderByDescending(options.OrderBy.Predicate).ToListAsync();
                 }
             }
-            else if (options.OrderBy.Ascending)
+            else if (options.OrderBy.Predicate != null)
             {
-                return await set.OrderBy(options.OrderBy.Predicate ?? (t => t.Position)).ToListAsync();
+                if (options.OrderBy.Ascending)
+                {
+                    return await set.OrderBy(options.OrderBy.Predicate).ToListAsync();
+                }
+                else
+                {
+                    return await set.OrderByDescending(options.OrderBy.Predicate).ToListAsync();
+                }
             }
             else
             {
-                return await set.OrderByDescending(options.OrderBy.Predicate ?? (t => t.Position)).ToListAsync();
+                return await set.ToListAsync();
             }
         }
 

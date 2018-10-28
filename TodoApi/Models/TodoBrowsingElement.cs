@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public class TodoElement : TodoBrowsingElement, ISortable
+    public abstract class TodoBrowsingElement : TodoElementBase
     {
-        public int Position { get; set; }
+        public int RemainingCount { get; internal set; }
     }
 }

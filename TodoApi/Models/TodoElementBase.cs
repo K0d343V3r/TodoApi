@@ -6,7 +6,7 @@ using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public class TodoElementBase : EntityBase
+    public abstract class TodoElementBase : EntityBase
     {
         public string Name { get; set; }
     }

@@ -49,7 +49,7 @@ namespace TodoApi.Helpers
                 else
                 {
                     // result is stale, remove it from result set
-                    EntityHelper.AdjustEntityPositions(lastResults.ToList<EntityBase>(), result.Position, false);
+                    EntityHelper.AdjustEntityPositions(lastResults.ToList<ISortable>(), result.Position, false);
                     _context.TodoReferences.Delete(result);
                 }
             }

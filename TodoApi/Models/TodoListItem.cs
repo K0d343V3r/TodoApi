@@ -3,8 +3,9 @@ using TodoApi.Repository;
 
 namespace TodoApi.Models
 {
-    public class TodoListItem : EntityBase
+    public class TodoListItem : EntityBase, ISortable
     {
+        public int Position { get; set; }
         public string Task { get; set; }
         public bool Done { get; set; }
         public DateTime? DueDate { get; set; }

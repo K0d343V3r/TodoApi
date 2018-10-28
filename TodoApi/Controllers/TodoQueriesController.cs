@@ -63,10 +63,6 @@ namespace TodoApi.Controllers
         [ProducesResponseType(typeof(TodoQuery), (int)HttpStatusCode.Created)]
         public async Task<ActionResult<TodoQuery>> CreateQueryAsync([FromBody] TodoQuery query)
         {
-            // sort items based on requested position
-            var items = await _context.TodoQueries.GetAsync();
-            EntityHelper.AdjustEntityPosition(query, items.ToList<EntityBase>(), true);
-
             await _context.TodoQueries.AddAsync(query);
             await _context.SaveChangesAsync();
 
@@ -84,9 +80,6 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            // update item positions for todo list
-            var queries = await _context.TodoQueries.GetAsync();
-            EntityHelper.AdjustEntityPositions(query, queries.ToList<EntityBase>(), current);
             EntityHelper.UpdateFrom(current, query);
 
             _context.TodoQueries.Update(current);
@@ -107,19 +100,15 @@ namespace TodoApi.Controllers
             }
             else
             {
-                var queries = await _context.TodoQueries.GetAsync();
-                await DeleteQuery(query, queries);
+                await DeleteQuery(query);
                 await _context.SaveChangesAsync();
 
                 return id;
             }
         }
 
-        private async Task DeleteQuery(TodoQuery query, IList<TodoQuery> queries)
+        private async Task DeleteQuery(TodoQuery query)
         {
-            // adjust query positions
-            EntityHelper.AdjustEntityPositions(queries.ToList<EntityBase>(), query.Position, false);
-
             // delete last results
             var results = await _context.TodoReferences.GetAsync(r => r.TodoQueryId == query.Id);
             results.ForEach(r => _context.TodoReferences.Delete(r));
@@ -143,7 +132,7 @@ namespace TodoApi.Controllers
                 }
                 else
                 {
-                    await DeleteQuery(query, queries);
+                    await DeleteQuery(query);
                 }
             }
 

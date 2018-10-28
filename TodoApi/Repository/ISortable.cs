@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace TodoApi.Repository
 {
-    public abstract class EntityBase
+    public interface ISortable
     {
-        public int Id { get; set; }
+        int Position { get; set; }
     }
 }
