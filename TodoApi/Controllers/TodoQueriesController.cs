@@ -26,7 +26,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType(typeof(List<TodoQuery>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<List<TodoQuery>>> GetAllQueriesAsync()
         {
-            return await _context.TodoQueries.GetAsync();
+            return await _context.TodoQueries.GetAsync(q => q.Predicates);
         }
 
         [HttpGet("{id}", Name = "GetQuery")]
@@ -34,7 +34,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQuery>> GetQueryAsync(int id)
         {
-            var query = await _context.TodoQueries.GetAsync(id);
+            var query = await _context.TodoQueries.GetAsync(id, q => q.Predicates);
             if (query == null)
             {
                 return NotFound();
@@ -48,7 +48,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQueryResults>> ExecuteQueryAsync(int id)
         {
-            var query = await _context.TodoQueries.GetAsync(id);
+            var query = await _context.TodoQueries.GetAsync(id, q => q.Predicates);
             if (query == null)
             {
                 return NotFound();
@@ -74,7 +74,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQuery>> UpdateQueryAsync(int id, [FromBody] TodoQuery query)
         {
-            var current = await _context.TodoQueries.GetAsync(id);
+            var current = await _context.TodoQueries.GetAsync(id, q => q.Predicates);
             if (current == null)
             {
                 return NotFound();

@@ -36,7 +36,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType(typeof(List<TodoQueryElement>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<List<TodoQueryElement>>> GetAllQueryElementsAsync()
         {
-            var queries = await _context.TodoQueries.GetAsync();
+            var queries = await _context.TodoQueries.GetAsync(q => q.Predicates);
 
             var elements = new List<TodoQueryElement>();
             foreach (var query in queries)
@@ -68,7 +68,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQueryElement>> GetQueryElementAsync(int id)
         {
-            var query = await _context.TodoQueries.GetAsync(id);
+            var query = await _context.TodoQueries.GetAsync(id, q => q.Predicates);
             if (query == null)
             {
                 return NotFound();
@@ -109,7 +109,7 @@ namespace TodoApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQueryElement>> UpdateQueryElementAsync(int id, [FromBody] TodoQueryElement element)
         {
-            var current = await _context.TodoQueries.GetAsync(id);
+            var current = await _context.TodoQueries.GetAsync(id, q => q.Predicates);
             if (current == null)
             {
                 return NotFound();

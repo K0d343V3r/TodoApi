@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 
 namespace TodoApi.Models
 {
-    public enum QueryOperand
+    public enum QueryDirection
     {
-        DueDate,
-        Important,
-        Done
+        Ascending,
+        Descending
     }
 }

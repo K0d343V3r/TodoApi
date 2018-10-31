@@ -7,10 +7,8 @@ namespace TodoApi.Models
 {
     public class TodoQuery : TodoElementBase
     {
-        public QueryOperand Operand { get; set; }
-        public QueryOperator Operator { get; set; }
-        public bool BoolValue { get; set; }
-        public DateTime? AbsoluteDateValue { get; set; }
-        public int? RelativeDateValue { get; set; }
+        public List<TodoQueryPredicate> Predicates { get; set; } = new List<TodoQueryPredicate>();
+        public QueryOperand? OrderBy { get; set; }
+        public QueryDirection? OrderByDirection { get; set; }
     }
 }

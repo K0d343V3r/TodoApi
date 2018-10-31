@@ -155,11 +155,13 @@ namespace TodoApi.Helpers
         {
             UpdateFrom(toQuery as TodoElementBase, fromQuery as TodoElementBase);
 
-            toQuery.BoolValue = fromQuery.BoolValue;
-            toQuery.AbsoluteDateValue = fromQuery.AbsoluteDateValue;
-            toQuery.RelativeDateValue = fromQuery.RelativeDateValue;
-            toQuery.Operand = fromQuery.Operand;
-            toQuery.Operator = fromQuery.Operator;
+            toQuery.OrderBy = fromQuery.OrderBy;
+            toQuery.OrderByDirection = fromQuery.OrderByDirection;
+
+            var predicates = new List<TodoQueryPredicate>(toQuery.Predicates);
+
+            toQuery.Predicates.Clear();
+            toQuery.Predicates.AddRange(fromQuery.Predicates);
         }
 
         public static void UpdateFrom(TodoElementBase toBase, TodoElementBase fromBase)
