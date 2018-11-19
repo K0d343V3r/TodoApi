@@ -6,6 +6,7 @@ Web API service to manage todo lists and tasks.  Features:
 - Entity Framework Core.
 - SQL Server back-end (configuration driven connection string).
 - Repository pattern for testability.
+- Complex query support via DynamicExpressionParser.
 - Docker container support.
 - Swagger support.
 - CORS support.
