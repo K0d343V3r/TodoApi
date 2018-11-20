@@ -1,5 +1,5 @@
 ﻿using System;
-using Todo.Api.Repository;
+using Api.Common.Repository;
 
 namespace Todo.Api.Models
 {

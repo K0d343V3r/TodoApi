@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Todo.Api.Models;
-using Todo.Api.Repository;
+using Api.Common.Repository;
 
 namespace Todo.Api.Helpers
 {

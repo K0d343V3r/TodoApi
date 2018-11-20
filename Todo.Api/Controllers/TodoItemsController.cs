@@ -5,7 +5,8 @@ using System.Net;
 using System.Threading.Tasks;
 using Todo.Api.Helpers;
 using Todo.Api.Models;
-using Todo.Api.Repository;
+using Api.Common.Repository;
+using Api.Common;
 
 namespace Todo.Api.Controllers
 {

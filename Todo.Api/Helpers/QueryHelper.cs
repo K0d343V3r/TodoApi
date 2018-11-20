@@ -6,7 +6,8 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Todo.Api.Models;
-using Todo.Api.Repository;
+using Api.Common.Repository;
+using Api.Common;
 
 namespace Todo.Api.Helpers
 {

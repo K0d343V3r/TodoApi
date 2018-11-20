@@ -25,4 +25,8 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Api.Common\Api.Common\Api.Common.csproj" />
+  </ItemGroup>
+
 </Project>
