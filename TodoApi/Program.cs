@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using TodoApi.Models;
+using Todo.Api.Models;
 
-namespace TodoApi
+namespace Todo.Api
 {
     public class Program
     {

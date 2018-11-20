@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using TodoApi.Helpers;
-using TodoApi.Models;
-using TodoApi.Repository;
+using Todo.Api.Helpers;
+using Todo.Api.Models;
+using Todo.Api.Repository;
 
-namespace TodoApi.Controllers
+namespace Todo.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

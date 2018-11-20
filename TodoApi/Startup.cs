@@ -8,9 +8,9 @@ using NJsonSchema;
 using NSwag.AspNetCore;
 using System;
 using System.Reflection;
-using TodoApi.Models;
+using Todo.Api.Models;
 
-namespace TodoApi
+namespace Todo.Api
 {
     public class Startup
     {

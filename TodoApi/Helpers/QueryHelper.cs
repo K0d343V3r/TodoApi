@@ -5,10 +5,10 @@ using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using TodoApi.Models;
-using TodoApi.Repository;
+using Todo.Api.Models;
+using Todo.Api.Repository;
 
-namespace TodoApi.Helpers
+namespace Todo.Api.Helpers
 {
     internal class QueryHelper
     {

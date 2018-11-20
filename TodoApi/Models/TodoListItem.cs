@@ -1,7 +1,7 @@
 ﻿using System;
-using TodoApi.Repository;
+using Todo.Api.Repository;
 
-namespace TodoApi.Models
+namespace Todo.Api.Models
 {
     public class TodoListItem : EntityBase, ISortable
     {

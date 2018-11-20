@@ -1,4 +1,4 @@
-# TodoApi
+# Todo.Api
 
 Web API service to manage todo lists and tasks.  Features:
 

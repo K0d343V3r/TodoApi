@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TodoApi.Repository;
+using Todo.Api.Repository;
 
-namespace TodoApi.Helpers
+namespace Todo.Api.Helpers
 {
     public static class PositionAdjustor
     {

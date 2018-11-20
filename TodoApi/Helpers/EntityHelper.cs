@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TodoApi.Models;
-using TodoApi.Repository;
+using Todo.Api.Models;
+using Todo.Api.Repository;
 
-namespace TodoApi.Helpers
+namespace Todo.Api.Helpers
 {
     internal static class EntityHelper
     {
