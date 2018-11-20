@@ -32,7 +32,7 @@ namespace TodoApi.Controllers
 
             // re-arrange other references affected by move
             var references = await _context.TodoReferences.GetAsync(r => r.TodoQueryId == reference.TodoQueryId);
-            EntityHelper.AdjustEntityPositions(reference, references.ToList<ISortable>(), current);
+            PositionAdjustor.AdjustForUpdate(reference, references.ToList<ISortable>(), current);
 
             // move reference to desired location
             current.Position = reference.Position;

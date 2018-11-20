@@ -94,7 +94,7 @@ namespace TodoApi.Controllers
             {
                 // if default list is being updated, no need to adjust other lists positions
                 var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
-                EntityHelper.AdjustEntityPositions(element, lists.ToList<ISortable>(), current);
+                PositionAdjustor.AdjustForUpdate(element, lists.ToList<ISortable>(), current);
             }
 
             EntityHelper.UpdateFrom(current, element);

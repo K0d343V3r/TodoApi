@@ -53,7 +53,7 @@ namespace TodoApi.Helpers
                 else
                 {
                     // result is stale, remove it from result set
-                    EntityHelper.AdjustEntityPositions(lastResults.ToList<ISortable>(), result.Position, false);
+                    PositionAdjustor.AdjustForDelete(result, lastResults.ToList<ISortable>());
                     _context.TodoReferences.Delete(result);
                 }
             }
