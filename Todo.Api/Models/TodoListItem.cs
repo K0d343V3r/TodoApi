@@ -11,5 +11,16 @@ namespace Todo.Api.Models
         public DateTime? DueDate { get; set; }
         public bool Important { get; set; }
         public int TodoListId { get; set; }
+
+        public void UpdateFrom(TodoListItem fromItem)
+        {
+            base.UpdateFrom(fromItem);
+
+            Task = fromItem.Task;
+            Done = fromItem.Done;
+            DueDate = fromItem.DueDate;
+            Important = fromItem.Important;
+            TodoListId = fromItem.TodoListId;
+        }
     }
 }

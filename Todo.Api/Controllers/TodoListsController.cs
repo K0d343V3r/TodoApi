@@ -20,14 +20,14 @@ namespace Todo.Api.Controllers
         {
             _context = context;
 
-            Task.Run(() => EntityHelper.CreateDefaultListAsync(context)).Wait();
+            Task.Run(() => DefaultList.CreateAsync(context)).Wait();
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(List<TodoList>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<List<TodoList>>> GetAllListsAsync()
         {
-            List<TodoList> lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId, l => l.Items);
+            List<TodoList> lists = await _context.TodoLists.GetAsync(l => l.Id != DefaultList.id, l => l.Items);
             lists.ForEach(l => l.Items = l.Items.OrderBy(i => i.Position).ToList());
 
             return lists;
@@ -62,7 +62,7 @@ namespace Todo.Api.Controllers
         [ProducesResponseType(typeof(TodoList), (int)HttpStatusCode.Created)]
         public async Task<ActionResult<TodoList>> CreateListAsync([FromBody] TodoList list)
         {
-            var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
+            var lists = await _context.TodoLists.GetAsync(l => l.Id != DefaultList.id);
             PositionAdjustor.AdjustForCreate(list, lists.ToList<ISortable>(), list.Items.ToList<ISortable>());
 
             await _context.TodoLists.AddAsync(list);
@@ -82,14 +82,14 @@ namespace Todo.Api.Controllers
                 return NotFound();
             }
 
-            if (id != EntityHelper.defaultListId)
+            if (id != DefaultList.id)
             {
                 // if default list being updated, no need to mess with list ordering
-                var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
+                var lists = await _context.TodoLists.GetAsync(l => l.Id != DefaultList.id);
                 PositionAdjustor.AdjustForUpdate(list, lists.ToList<ISortable>(), current, list.Items.ToList<ISortable>());
             }
 
-            EntityHelper.UpdateFrom(current, list);
+            current.UpdateFrom(list);
             _context.TodoLists.Update(current);
             await _context.SaveChangesAsync();
 
@@ -102,7 +102,7 @@ namespace Todo.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<int>> DeleteListAsync(int id)
         {
-            if (id == EntityHelper.defaultListId)
+            if (id == DefaultList.id)
             {
                 // we do not delete the default list
                 return BadRequest("Cannot delete default list");
@@ -116,7 +116,7 @@ namespace Todo.Api.Controllers
                 }
                 else
                 {
-                    var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
+                    var lists = await _context.TodoLists.GetAsync(l => l.Id != DefaultList.id);
                     PositionAdjustor.AdjustForDelete(list, lists.ToList<ISortable>());
 
                     _context.TodoLists.Delete(list);
@@ -133,10 +133,10 @@ namespace Todo.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<List<int>>> DeleteListsAsync([FromQuery(Name ="id")] List<int> ids)
         {
-            var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
+            var lists = await _context.TodoLists.GetAsync(l => l.Id != DefaultList.id);
             foreach (var id in ids)
             {
-                if (id == EntityHelper.defaultListId)
+                if (id == DefaultList.id)
                 {
                     return BadRequest("Cannot delete default list.");
                 }

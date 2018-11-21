@@ -22,15 +22,15 @@ namespace Todo.Api.Controllers
             _context = context;
             _queryHelper = new QueryHelper(context);
 
-            Task.Run(() => EntityHelper.CreateDefaultListAsync(context)).Wait();
+            Task.Run(() => DefaultList.CreateAsync(context)).Wait();
         }
 
         [HttpGet("lists")]
         [ProducesResponseType(typeof(List<TodoElement>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<List<TodoElement>>> GetAllListElementsAsync()
         {
-            var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId, l => l.Items);
-            return lists.Select(list => EntityHelper.ToElement(list)).ToList();
+            var lists = await _context.TodoLists.GetAsync(l => l.Id != DefaultList.id, l => l.Items);
+            return lists.Select(list => list.ToElement()).ToList();
         }
 
         [HttpGet("queries")]
@@ -44,7 +44,7 @@ namespace Todo.Api.Controllers
             {
                 // execute query to return up to date remaining counts
                 var references = await _queryHelper.ExecuteQueryAsync(query);
-                elements.Add(EntityHelper.ToElement(query, references.Count(r => !r.Item.Done)));
+                elements.Add(query.ToElement(references.Count(r => !r.Item.Done)));
             }
 
             return elements;
@@ -61,7 +61,7 @@ namespace Todo.Api.Controllers
                 return NotFound();
             }
 
-            return EntityHelper.ToElement(list);
+            return list.ToElement();
         }
 
         [HttpGet("queries/{id}", Name = "GetQueryElement")]
@@ -77,7 +77,7 @@ namespace Todo.Api.Controllers
 
             // execute query to return up to date remaining counts
             var references = await _queryHelper.ExecuteQueryAsync(query);
-            return EntityHelper.ToElement(query, references.Count(r => !r.Item.Done));
+            return query.ToElement(references.Count(r => !r.Item.Done));
         }
 
         [HttpPut("lists/{id}")]
@@ -91,18 +91,18 @@ namespace Todo.Api.Controllers
                 return NotFound();
             }
 
-            if (id != EntityHelper.defaultListId)
+            if (id != DefaultList.id)
             {
                 // if default list is being updated, no need to adjust other lists positions
-                var lists = await _context.TodoLists.GetAsync(l => l.Id != EntityHelper.defaultListId);
+                var lists = await _context.TodoLists.GetAsync(l => l.Id != DefaultList.id);
                 PositionAdjustor.AdjustForUpdate(element, lists.ToList<ISortable>(), current);
             }
 
-            EntityHelper.UpdateFrom(current, element);
+            current.UpdateFrom(element);
             _context.TodoLists.Update(current);
             await _context.SaveChangesAsync();
 
-            return EntityHelper.ToElement(current);
+            return current.ToElement();
         }
 
         [HttpPut("queries/{id}")]
@@ -116,14 +116,14 @@ namespace Todo.Api.Controllers
                 return NotFound();
             }
 
-            EntityHelper.UpdateFrom(current, element);
+            current.UpdateFrom(element);
 
             _context.TodoQueries.Update(current);
             await _context.SaveChangesAsync();
 
             // we do not execute query, just return existing information
             var references = await _context.TodoReferences.GetAsync(r => r.TodoQueryId == id);
-            return EntityHelper.ToElement(current, references.Count(r => !r.Item.Done));
+            return current.ToElement(references.Count(r => !r.Item.Done));
         }
     }
 }

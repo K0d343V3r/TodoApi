@@ -9,5 +9,12 @@ namespace Todo.Api.Models
     public abstract class TodoElementBase : EntityBase
     {
         public string Name { get; set; }
+
+        public void UpdateFrom(TodoElementBase fromBase)
+        {
+            base.UpdateFrom(fromBase);
+
+            Name = fromBase.Name;
+        }
     }
 }

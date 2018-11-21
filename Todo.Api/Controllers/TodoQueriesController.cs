@@ -80,7 +80,7 @@ namespace Todo.Api.Controllers
                 return NotFound();
             }
 
-            EntityHelper.UpdateFrom(current, query);
+            current.UpdateFrom(query);
 
             _context.TodoQueries.Update(current);
             await _context.SaveChangesAsync();

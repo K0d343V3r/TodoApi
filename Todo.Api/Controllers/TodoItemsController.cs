@@ -70,7 +70,7 @@ namespace Todo.Api.Controllers
             // update item positions for todo list
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
             PositionAdjustor.AdjustForUpdate(item, items.ToList<ISortable>(), current);
-            EntityHelper.UpdateFrom(current, item);
+            current.UpdateFrom(item);
 
             _context.TodoItems.Update(current);
             await _context.SaveChangesAsync();
