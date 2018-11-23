@@ -13,11 +13,21 @@ namespace Todo.Api.Models
 
         public TodoQueryElement ToElement(int remainingCount)
         {
-            var element = new TodoQueryElement();
-            element.UpdateFrom(this);
-            element.Query = this;
-            element.RemainingCount = remainingCount;
+            var element = new TodoQueryElement
+            {
+                Id = Id,
+                Name = Name,
+                Query = this,
+                RemainingCount = remainingCount
+            };
             return element;
+        }
+
+        public void UpdateFrom(TodoQueryElement fromElement)
+        {
+            base.UpdateFrom(fromElement);
+
+            // nothing to update other than in base class
         }
 
         public void UpdateFrom(TodoQuery fromQuery)

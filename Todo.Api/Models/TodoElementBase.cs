@@ -12,8 +12,6 @@ namespace Todo.Api.Models
 
         public void UpdateFrom(TodoElementBase fromBase)
         {
-            base.UpdateFrom(fromBase);
-
             Name = fromBase.Name;
         }
     }

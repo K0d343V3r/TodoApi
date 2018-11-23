@@ -14,8 +14,7 @@ namespace Todo.Api.Models
 
         public void UpdateFrom(TodoListItem fromItem)
         {
-            base.UpdateFrom(fromItem);
-
+            Position = fromItem.Position;
             Task = fromItem.Task;
             Done = fromItem.Done;
             DueDate = fromItem.DueDate;

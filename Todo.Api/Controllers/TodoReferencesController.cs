@@ -36,7 +36,7 @@ namespace Todo.Api.Controllers
             PositionAdjustor.AdjustForUpdate(reference, references.ToList<ISortable>(), current);
 
             // move reference to desired location
-            current.Position = reference.Position;
+            current.UpdateFrom(reference);
 
             _context.TodoReferences.Update(current);
             await _context.SaveChangesAsync();

@@ -13,15 +13,28 @@ namespace Todo.Api.Models
 
         public TodoElement ToElement()
         {
-            var element = new TodoElement();
-            element.UpdateFrom(this);
-            element.RemainingCount = Items.Count(i => !i.Done);
+            var element = new TodoElement
+            {
+                Id = Id,
+                Name = Name,
+                Position = Position,
+                RemainingCount = Items.Count(i => !i.Done)
+            };
             return element;
+        }
+
+        public void UpdateFrom(TodoElement fromElement)
+        {
+            base.UpdateFrom(fromElement);
+
+            Position = fromElement.Position;
         }
 
         public void UpdateFrom(TodoList fromList)
         {
             base.UpdateFrom(fromList);
+
+            Position = fromList.Position;
 
             // remove obsolete child items
             List<TodoListItem> items = new List<TodoListItem>(Items);

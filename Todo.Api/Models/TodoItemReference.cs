@@ -11,5 +11,11 @@ namespace Todo.Api.Models
         public int Position { get; set; }
         public TodoListItem Item { get; set; }
         public int TodoQueryId { get; set; }
+
+        public void UpdateFrom(TodoItemReference fromReference)
+        {
+            // we only update positions on references
+            Position = fromReference.Position;
+        }
     }
 }
