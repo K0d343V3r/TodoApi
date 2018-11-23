@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Api.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Todo.Api.Models
 {
-    public class TodoQuery : TodoElementBase
+    public class TodoQuery : TodoElementBase, IUpdatable<TodoQuery>
     {
         public List<TodoQueryPredicate> Predicates { get; set; } = new List<TodoQueryPredicate>();
         public QueryOperand? OrderBy { get; set; }
@@ -37,8 +38,7 @@ namespace Todo.Api.Models
             OrderBy = fromQuery.OrderBy;
             OrderByDirection = fromQuery.OrderByDirection;
 
-            Predicates.Clear();
-            Predicates.AddRange(fromQuery.Predicates);
+            CollectionUpdater<TodoQueryPredicate>.Update(Predicates, fromQuery.Predicates);
         }
     }
 }

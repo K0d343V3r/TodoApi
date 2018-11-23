@@ -54,7 +54,7 @@ namespace Todo.Api.Helpers
                 else
                 {
                     // result is stale, remove it from result set
-                    PositionAdjustor.AdjustForDelete(result, lastResults.ToList<ISortable>());
+                    PositionAdjuster.AdjustForDelete(result, lastResults.ToList<ISortable>());
                     _context.TodoReferences.Delete(result);
                 }
             }

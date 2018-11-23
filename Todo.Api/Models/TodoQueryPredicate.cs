@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Api.Common;
 using Api.Common.Repository;
 
 namespace Todo.Api.Models
 {
-    public class TodoQueryPredicate : EntityBase
+    public class TodoQueryPredicate : EntityBase, IUpdatable<TodoQueryPredicate>
     {
         public QueryOperand Operand { get; set; }
         public QueryOperator Operator { get; set; }
@@ -16,5 +17,17 @@ namespace Todo.Api.Models
         public QueryKeyword? Keyword { get; set; }
         public QueryPredicateGroup? Group { get; set; }
         public int TodoQueryId { get; set; }
+
+        public void UpdateFrom(TodoQueryPredicate fromPredicate)
+        {
+            Operand = fromPredicate.Operand;
+            Operator = fromPredicate.Operator;
+            BoolValue = fromPredicate.BoolValue;
+            AbsoluteDateValue = fromPredicate.AbsoluteDateValue;
+            RelativeDateValue = fromPredicate.RelativeDateValue;
+            Keyword = fromPredicate.Keyword;
+            Group = fromPredicate.Group;
+            TodoQueryId = fromPredicate.TodoQueryId;
+        }
     }
 }

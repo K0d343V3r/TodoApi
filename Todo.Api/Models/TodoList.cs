@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Api.Common;
 using Api.Common.Repository;
 
 namespace Todo.Api.Models
 {
-    public class TodoList : TodoElementBase, ISortable
+    public class TodoList : TodoElementBase, ISortable, IUpdatable<TodoList>
     {
         public int Position { get; set; }
         public List<TodoListItem> Items { get; set; } = new List<TodoListItem>();
@@ -36,30 +37,7 @@ namespace Todo.Api.Models
 
             Position = fromList.Position;
 
-            // remove obsolete child items
-            List<TodoListItem> items = new List<TodoListItem>(Items);
-            foreach (var item in items)
-            {
-                if (!fromList.Items.Any(i => i.Id == item.Id))
-                {
-                    Items.Remove(item);
-                }
-            }
-
-            // update existing or add new child items
-            for (int i = 0; i < fromList.Items.Count; i++)
-            {
-                var current = fromList.Items[i].Id == 0 ? null :
-                    Items.FirstOrDefault(t => t.Id == fromList.Items[i].Id);
-                if (current == null)
-                {
-                    Items.Add(fromList.Items[i]);
-                }
-                else
-                {
-                    current.UpdateFrom(fromList.Items[i]);
-                }
-            }
+            CollectionUpdater<TodoListItem>.Update(Items, fromList.Items);
         }
     }
 }

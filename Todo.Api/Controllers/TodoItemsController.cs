@@ -48,7 +48,7 @@ namespace Todo.Api.Controllers
         {
             // sort items based on requested position
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-            PositionAdjustor.AdjustForCreate(item, items.ToList<ISortable>());
+            PositionAdjuster.AdjustForCreate(item, items.ToList<ISortable>());
 
             await _context.TodoItems.AddAsync(item);
             await _context.SaveChangesAsync();
@@ -69,7 +69,7 @@ namespace Todo.Api.Controllers
 
             // update item positions for todo list
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-            PositionAdjustor.AdjustForUpdate(item, items.ToList<ISortable>(), current);
+            PositionAdjuster.AdjustForUpdate(item, items.ToList<ISortable>(), current);
             current.UpdateFrom(item);
 
             _context.TodoItems.Update(current);
@@ -100,13 +100,13 @@ namespace Todo.Api.Controllers
         private async Task DeleteItem(TodoListItem item)
         {
             var items = await _context.TodoItems.GetAsync(t => t.TodoListId == item.TodoListId);
-            PositionAdjustor.AdjustForDelete(item, items.ToList<ISortable>());
+            PositionAdjuster.AdjustForDelete(item, items.ToList<ISortable>());
 
             var references = await _context.TodoReferences.GetAsync(r => r.Item.Id == item.Id);
             foreach (var reference in references)
             {
                 var group = await _context.TodoReferences.GetAsync(r => r.TodoQueryId == reference.TodoQueryId);
-                PositionAdjustor.AdjustForDelete(reference, references.ToList<ISortable>());
+                PositionAdjuster.AdjustForDelete(reference, references.ToList<ISortable>());
 
                 _context.TodoReferences.Delete(reference);
             }

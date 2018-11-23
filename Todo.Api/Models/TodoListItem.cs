@@ -1,9 +1,10 @@
 ﻿using System;
+using Api.Common;
 using Api.Common.Repository;
 
 namespace Todo.Api.Models
 {
-    public class TodoListItem : EntityBase, ISortable
+    public class TodoListItem : EntityBase, ISortable, IUpdatable<TodoListItem>
     {
         public int Position { get; set; }
         public string Task { get; set; }

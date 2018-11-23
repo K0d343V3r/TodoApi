@@ -63,7 +63,7 @@ namespace Todo.Api.Controllers
         public async Task<ActionResult<TodoList>> CreateListAsync([FromBody] TodoList list)
         {
             var lists = await _context.TodoLists.GetAsync(l => l.Id != DefaultList.id);
-            PositionAdjustor.AdjustForCreate(list, lists.ToList<ISortable>(), list.Items.ToList<ISortable>());
+            PositionAdjuster.AdjustForCreate(list, lists.ToList<ISortable>(), list.Items.ToList<ISortable>());
 
             await _context.TodoLists.AddAsync(list);
             await _context.SaveChangesAsync();
@@ -86,7 +86,7 @@ namespace Todo.Api.Controllers
             {
                 // if default list being updated, no need to mess with list ordering
                 var lists = await _context.TodoLists.GetAsync(l => l.Id != DefaultList.id);
-                PositionAdjustor.AdjustForUpdate(list, lists.ToList<ISortable>(), current, list.Items.ToList<ISortable>());
+                PositionAdjuster.AdjustForUpdate(list, lists.ToList<ISortable>(), current, list.Items.ToList<ISortable>());
             }
 
             current.UpdateFrom(list);
@@ -117,7 +117,7 @@ namespace Todo.Api.Controllers
                 else
                 {
                     var lists = await _context.TodoLists.GetAsync(l => l.Id != DefaultList.id);
-                    PositionAdjustor.AdjustForDelete(list, lists.ToList<ISortable>());
+                    PositionAdjuster.AdjustForDelete(list, lists.ToList<ISortable>());
 
                     _context.TodoLists.Delete(list);
                     await _context.SaveChangesAsync();
@@ -149,7 +149,7 @@ namespace Todo.Api.Controllers
                     }
                     else
                     {
-                        PositionAdjustor.AdjustForDelete(list, lists.ToList<ISortable>());
+                        PositionAdjuster.AdjustForDelete(list, lists.ToList<ISortable>());
                         _context.TodoLists.Delete(list);
                     }
                 }
