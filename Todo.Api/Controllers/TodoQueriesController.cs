@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Todo.Api.Helpers;
 using Todo.Api.Models;
 using Api.Common.Repository;
+using Api.Common;
 
 namespace Todo.Api.Controllers
 {
@@ -26,7 +27,12 @@ namespace Todo.Api.Controllers
         [ProducesResponseType(typeof(List<TodoQuery>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<List<TodoQuery>>> GetAllQueriesAsync()
         {
-            return await _context.TodoQueries.GetAsync(q => q.Predicates);
+            var queries = await _context.TodoQueries.GetAsync(q => q.Predicates);
+
+            // sort predicates by position
+            queries.ForEach(d => d.Predicates = d.Predicates.OrderBy(t => t.Position).ToList());
+
+            return queries;
         }
 
         [HttpGet("{id}", Name = "GetQuery")]
@@ -34,10 +40,22 @@ namespace Todo.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQuery>> GetQueryAsync(int id)
         {
-            var query = await _context.TodoQueries.GetAsync(id, q => q.Predicates);
+            var query = await FetchQueryAsync(id);
             if (query == null)
             {
                 return NotFound();
+            }
+
+            return query;
+        }
+
+        private async Task<TodoQuery> FetchQueryAsync(int id)
+        {
+            var query = await _context.TodoQueries.GetAsync(id, d => d.Predicates);
+            if (query != null)
+            {
+                // order queries by position
+                query.Predicates = query.Predicates.OrderBy(t => t.Position).ToList();
             }
 
             return query;
@@ -48,7 +66,7 @@ namespace Todo.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQueryResults>> ExecuteQueryAsync(int id)
         {
-            var query = await _context.TodoQueries.GetAsync(id, q => q.Predicates);
+            var query = await FetchQueryAsync(id);
             if (query == null)
             {
                 return NotFound();
@@ -63,6 +81,9 @@ namespace Todo.Api.Controllers
         [ProducesResponseType(typeof(TodoQuery), (int)HttpStatusCode.Created)]
         public async Task<ActionResult<TodoQuery>> CreateQueryAsync([FromBody] TodoQuery query)
         {
+            // adjust predicate positions to match their positions in collection
+            PositionAdjuster.AdjustChildren(query.Predicates.ToList<ISortable>());
+
             await _context.TodoQueries.AddAsync(query);
             await _context.SaveChangesAsync();
 
@@ -74,12 +95,15 @@ namespace Todo.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQuery>> UpdateQueryAsync(int id, [FromBody] TodoQuery query)
         {
-            var current = await _context.TodoQueries.GetAsync(id, q => q.Predicates);
+            var current = await FetchQueryAsync(id);
             if (current == null)
             {
                 return NotFound();
             }
 
+            // adjust predicate positions to match their positions in collection
+            PositionAdjuster.AdjustChildren(query.Predicates.ToList<ISortable>());
+  
             current.UpdateFrom(query);
 
             _context.TodoQueries.Update(current);

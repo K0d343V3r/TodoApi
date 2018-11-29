@@ -39,6 +39,9 @@ namespace Todo.Api.Controllers
         {
             var queries = await _context.TodoQueries.GetAsync(q => q.Predicates);
 
+            // sort all query predicates by position
+            queries.ForEach(l => l.Predicates = l.Predicates.OrderBy(i => i.Position).ToList());
+
             var elements = new List<TodoQueryElement>();
             foreach (var query in queries)
             {
@@ -69,7 +72,7 @@ namespace Todo.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQueryElement>> GetQueryElementAsync(int id)
         {
-            var query = await _context.TodoQueries.GetAsync(id, q => q.Predicates);
+            var query = await FetchQueryAsync(id);
             if (query == null)
             {
                 return NotFound();
@@ -78,6 +81,18 @@ namespace Todo.Api.Controllers
             // execute query to return up to date remaining counts
             var references = await _queryHelper.ExecuteQueryAsync(query);
             return query.ToElement(references.Count(r => !r.Item.Done));
+        }
+
+        private async Task<TodoQuery> FetchQueryAsync(int id)
+        {
+            var query = await _context.TodoQueries.GetAsync(id, d => d.Predicates);
+            if (query != null)
+            {
+                // order queries by position
+                query.Predicates = query.Predicates.OrderBy(t => t.Position).ToList();
+            }
+
+            return query;
         }
 
         [HttpPut("lists/{id}")]
@@ -110,7 +125,7 @@ namespace Todo.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<TodoQueryElement>> UpdateQueryElementAsync(int id, [FromBody] TodoQueryElement element)
         {
-            var current = await _context.TodoQueries.GetAsync(id, q => q.Predicates);
+            var current = await FetchQueryAsync(id);
             if (current == null)
             {
                 return NotFound();

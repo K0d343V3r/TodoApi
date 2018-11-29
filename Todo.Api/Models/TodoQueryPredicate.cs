@@ -7,7 +7,7 @@ using Api.Common.Repository;
 
 namespace Todo.Api.Models
 {
-    public class TodoQueryPredicate : EntityBase, IUpdatable<TodoQueryPredicate>
+    public class TodoQueryPredicate : EntityBase, ISortable, IUpdatable<TodoQueryPredicate>
     {
         public QueryOperand Operand { get; set; }
         public QueryOperator Operator { get; set; }
@@ -16,6 +16,7 @@ namespace Todo.Api.Models
         public int? RelativeDateValue { get; set; }
         public QueryKeyword? Keyword { get; set; }
         public QueryPredicateGroup? Group { get; set; }
+        public int Position { get; set; }
         public int TodoQueryId { get; set; }
 
         public void UpdateFrom(TodoQueryPredicate fromPredicate)
@@ -27,6 +28,7 @@ namespace Todo.Api.Models
             RelativeDateValue = fromPredicate.RelativeDateValue;
             Keyword = fromPredicate.Keyword;
             Group = fromPredicate.Group;
+            Position = fromPredicate.Position;
             TodoQueryId = fromPredicate.TodoQueryId;
         }
     }
