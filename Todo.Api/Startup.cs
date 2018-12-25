@@ -14,6 +14,13 @@ namespace Todo.Api
 {
     public class Startup
     {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -29,18 +36,15 @@ namespace Todo.Api
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 });
 
-            // read connection string from configuration
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
-
             // register database context
             services.AddDbContext<TodoContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             // add dependency injected data services
             services.AddScoped<ITodoRepositoryContext, TodoRepositoryContext>();
+
+            // Add OpenAPI/Swagger document
+            services.AddSwaggerDocument(); // registers a Swagger v2.0 document with the name "v1" (default)
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,11 +53,9 @@ namespace Todo.Api
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            // Enable the Swagger UI middleware and the Swagger generator
-            app.UseSwaggerUi(typeof(Startup).GetTypeInfo().Assembly, settings =>
-            {
-                settings.GeneratorSettings.DefaultPropertyNameHandling = PropertyNameHandling.CamelCase;
-            });
+            // Add OpenAPI/Swagger middlewares
+            app.UseSwagger(); // Serves the registered OpenAPI/Swagger documents by default on `/swagger/{documentName}/swagger.json`
+            app.UseSwaggerUi3(); // Serves the Swagger UI 3 web ui to view the OpenAPI/Swagger documents by default on `/swagger`
 
             app.UseCors(builder => builder.WithOrigins("http://localhost:4200")
                 .AllowAnyMethod()
